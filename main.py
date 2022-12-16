@@ -26,7 +26,7 @@ from outputs.outputs import *
 # Define path
 path_data = "C:/Users/charl/OneDrive/Bureau/City_dataStudy/"
 path_folder = "C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Data/"
-path_calibration = "C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/calibration_20211124/" #calibration_20211124
+path_calibration = "C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/final_results/calibration_20211124/"
 #os.mkdir(path_calibration)
 path_outputs = "C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/robustness_fe_2_v2/"
 #os.mkdir(path_outputs)
@@ -223,7 +223,6 @@ for city in np.delete(np.unique(list_city.City), 153):
         year_array = np.arange(0, 50)
         array_BRT_capital_cost = capital_cost_year_one / (1.05 ** year_array)
     
-        
     ### CALIBRATION AND PARAMETERS
     
     print("\n** Calibration and parameters **\n")
@@ -507,7 +506,7 @@ for city in np.delete(np.unique(list_city.City), 153):
             density_without_inertia = density_without_inertia * np.exp(residuals_for_simulation.density_residual)
         
     
-        #COMPUTE EQUILIBRIUM WITH INERTIA
+        ### COMPUTE EQUILIBRIUM WITH INERTIA
         
         housing_supply_t1 = compute_housing_supply(housing_without_inertia, housing_t0, TIME_LAG, DEPRECIATION_TIME)
             
@@ -559,14 +558,15 @@ for city in np.delete(np.unique(list_city.City), 153):
             simul_rent, simul_size, simul_density = model2(np.array([BETA, float(R_0), B, kappa]), coeff_land, prix_transport, income - cost_BRT_per_pers + (aggregated_tax / population), INTEREST_RATE, HOUSEHOLD_SIZE, agricultural_rent, housing_supply_t1, 1)
         
         housing_t0 = simul_size * simul_density
+        
         if index == 4:
             copy_simul_density = copy.deepcopy(simul_density)
+        
         if option["add_residuals"] == True:
             simul_rent = simul_rent * np.exp(residuals_for_simulation.rent_residual)
             simul_size = simul_size * np.exp(residuals_for_simulation.size_residual)
             simul_density = simul_density * np.exp(residuals_for_simulation.density_residual)
     
-        
         # Save outputs
         save_density[index, :] = simul_density
         save_rent[index, :] = simul_rent
