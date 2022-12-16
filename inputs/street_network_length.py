@@ -14,15 +14,6 @@ import osmnx as ox
 
 from functions import *
 
-path_data = "C:/Users/charl/OneDrive/Bureau/City_dataStudy/"
-list_city = list_of_cities_and_databases(path_data,'cityDatabase')
-
-length = {}
-
-#for city in ["Bogota", "Ahmedabad", "Curitiba", "Mexico_City", "Belo_Horizonte", "Istanbul", "Brisbane", "Jakarta"]:
-for city in np.unique(list_city.City):
-    length[city] = import_street_network(city, path_data, list_city)
-
 def import_street_network(city, paths_data, list_city):
     
     path_data_city=paths_data+"Data/"
@@ -69,6 +60,13 @@ def import_street_network(city, paths_data, list_city):
      
     return length_network
 
+
+path_data = "C:/Users/charl/OneDrive/Bureau/City_dataStudy/"
+list_city = list_of_cities_and_databases(path_data,'cityDatabase')
+length = {}
+
+for city in np.unique(list_city.City):
+    length[city] = import_street_network(city, path_data, list_city)
 
 
     
