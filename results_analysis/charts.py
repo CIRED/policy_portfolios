@@ -1,9 +1,56 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Aug 25 14:04:48 2022
+Created on Fri Dec 16 16:48:52 2022
 
 @author: charl
 """
+
+### MAPS
+
+plt.scatter(grille.XCOORD, grille.YCOORD, c = density, cmap='RdBu_r')
+plt.colorbar()
+#plt.clim(0, 8000) 
+plt.axis('off')
+
+plt.scatter(grille.XCOORD, grille.YCOORD, c = simul_density, cmap='RdBu_r')
+plt.colorbar()
+#plt.clim(0, 8000) 
+plt.axis('off')
+
+plt.scatter(grille.XCOORD, grille.YCOORD, c = rent, cmap='RdYlBu_r')
+plt.colorbar()
+plt.clim(0, 350) 
+plt.axis('off')
+
+plt.scatter(grille.XCOORD, grille.YCOORD, c = simul_rent, cmap='RdYlBu_r')
+plt.colorbar()
+plt.clim(0, 350) 
+plt.axis('off')
+
+### SCATTERPLOTS
+
+plt.scatter(df.emissions_2035_CT_var, df.welfare_2035_CT_var)
+plt.scatter(df.emissions_2035_FE_var, df.welfare_2035_FE_var)
+plt.scatter(df.emissions_2035_UGB_var, df.welfare_2035_UGB_var)
+plt.scatter(df.emissions_2035_BRT_var, df.welfare_2035_BRT_var)
+
+plt.scatter(df.emissions_2035_CT_var, df.welfare_2035_CT_var_without)
+plt.scatter(df.emissions_2035_FE_var, df.welfare_2035_FE_var_without)
+plt.scatter(df.emissions_2035_UGB_var, df.welfare_2035_UGB_var_without)
+plt.scatter(df.emissions_2035_BRT_var, df.welfare_2035_BRT_var_without)
+
+plt.figure(figsize = (15, 10))
+plt.rcParams.update({'font.size': 20})
+colors = list(df['Continent'].unique())
+for i in range(0 , len(colors)):
+    data = df.loc[df['Continent'] == colors[i]]
+    plt.scatter(data.welfare_2035_UGB_var, data.emissions_2035_UGB_var, color=data.Continent.map(color_tab), label=colors[i], s = 100)
+plt.xlabel("Welfare variation (with cobenefits)", size = 20)
+plt.ylabel("Emissions variation", size = 20)
+plt.legend()
+plt.title("UGB - with health cobenefits")
+
+### BAR CHARTS
 
 df["quartiles_CT"] = "Q0"
 df["quartiles_CT"][df["cost_effectiveness_with_cobenefits_CT"] <  np.quantile(df["cost_effectiveness_with_cobenefits_CT"], 0.25)] = "Q4"
@@ -54,7 +101,6 @@ plt.text(x=1.8, y=-2, s=str(round(tidy_CT.Value[(tidy_CT.Quartile == "Q3") & (ti
                  color='black', fontsize=10, horizontalalignment='center')
 plt.text(x=2.8, y=-2.5, s=str(round(tidy_CT.Value[(tidy_CT.Quartile == "Q4") & (tidy_CT.Variable == "Average Emissions")].squeeze(), 1))+ "%",
                  color='black', fontsize=10, horizontalalignment='center')
-
 
 df["quartiles_FE"] = "Q0"
 df["quartiles_FE"][df["cost_effectiveness_with_cobenefits_FE"] <  np.quantile(df["cost_effectiveness_with_cobenefits_FE"], 0.25)] = "Q4"

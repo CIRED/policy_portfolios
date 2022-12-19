@@ -18,18 +18,21 @@ from calibration.validation import *
 from inputs.data import *
 from inputs.geo_data import *
 from inputs.land_use import *
-from model.model import *
-from outputs.outputs import *
 from inputs.parameters import *
 from inputs.transport import *
+from model.model import *
+from outputs.scipy_help import _centered
+import scipy.signal.signaltools
+scipy.signal.signaltools._centered = _centered
+from outputs.outputs import *
 
 # Define path
 path_data = "C:/Users/charl/OneDrive/Bureau/City_dataStudy/"
 path_folder = "C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Data/"
-path_calibration = "C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/calibration_20211124/" #calibration_20211124
+path_calibration = "C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/final_results/calibration_20211124/" #calibration_20211124
 #os.mkdir(path_calibration)
-path_outputs = "C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/all_welfare_increasing_20220907/"
-#os.mkdir(path_outputs)
+path_outputs = "C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/all_welfare_increasing_20221218/"
+os.mkdir(path_outputs)
 path_street_network="C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Data/street_network/"
 
 # Choose options
@@ -43,7 +46,7 @@ option_ugb = "predict_urba" #Choose one between: predict_urba (main results), de
 BRT_scenario = 'speed_40_0_12_50_5' #Choose one between: speed_40_0_12_50_5, baseline_25_0_12_50_5, capital_evolution_25_0_12_50_income, capital_evolution_25_0_12_15_income
 
 # Choose fuel-technology scenario
-FUEL_EFFICIENCY_DECREASE = 963
+FUEL_EFFICIENCY_DECREASE = 0.963
 BASELINE_EFFICIENCY_DECREASE = 0.99
 LIFESPAN = 15
 
@@ -63,7 +66,7 @@ if option["validation"] == 1:
      rae_density1, rae_rent1, rae_size1, rae_density2, rae_rent2, 
      rae_size2) = initialize_dict()
 
-results_by_pol = pd.read_excel('C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Rendus_20220831/results_robustness_20220913.xlsx', header = 0, index_col = 0)
+results_by_pol = pd.read_excel('C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/results_20221218.xlsx', header = 0, index_col = 0)
 
 # Loop to run the model on all cities
 for city in results_by_pol.City:
