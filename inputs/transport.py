@@ -118,7 +118,48 @@ def transport_modeling(driving, transit, income, fuel_price, fuel_consumption, F
     mode_choice=np.argmin(tous_prix, axis=0)
     mode_choice[np.isnan(prix_transit) & (prix_driving < prix_walking)] = 0
     mode_choice[np.isnan(prix_transit) & (prix_driving > prix_walking)] = 2
-    return prix_transport, mode_choice
+    return prix_transport, mode_choice, prix_driving, prix_transit, prix_walking
+
+def transport_modeling_bis(driving, transit, income, fuel_price, fuel_consumption, FIXED_COST_CAR, monetary_cost_pt, distance_cbd, WALKING_SPEED, policy, index, city, grille, centre, orig_dist, target_dist, transit_dist, BRT_SPEED, alpha_cong, beta_cong, Q):
+    #duration_with_cong = 3600 * ((driving.Distance / 1000) / np.maximum((alpha_cong - (beta_cong * Q)), 10))
+    duration_with_cong = 3600 * ((driving.Distance / 1000) / (alpha_cong - (beta_cong * Q)))
+    prix_driving = duration_with_cong * income / (3600 * 24) / 365 + driving.Distance * fuel_price * fuel_consumption / 100000 + FIXED_COST_CAR
+    if ((index > 4) & (policy == 'transit_speed')):
+        prix_transit = ((transit.Duration  / 1.2) * income / (3600 * 24) / 365) + monetary_cost_pt
+    elif ((policy == 'BRT') & (index > 4)) | ((policy == 'synergy') & (index > 4)):#| ((policy == 'all') & (index > 4)):
+        prix_transit = ((transit.Duration) * income / (3600 * 24) / 365) + monetary_cost_pt
+        prix_BRT = (((((orig_dist + target_dist) / (WALKING_SPEED * 1000)) + ((transit_dist / 1000) / BRT_SPEED)) * (income / (24 * 365))) + monetary_cost_pt).squeeze()
+        prix_transit = np.nanmin(np.vstack((prix_transit, prix_BRT)), axis = 0)
+    elif ((policy == 'basic_infra') & (index > 4))| ((policy == 'all') & (index > 4)):
+        if city == 'Prague' or city == 'Tianjin' or city == 'Paris':
+            prix_transit = ((transit.Duration) * income / (3600 * 24) / 365) + monetary_cost_pt
+            price_north_axis = ((((np.abs(grille.XCOORD - centre[0][0]) / 1000) / WALKING_SPEED) + ((np.abs(grille.YCOORD - centre[0][1]) / 1000) / 25)) * (income / (24 * 365))) + monetary_cost_pt
+            price_east_axis = ((((np.abs(grille.XCOORD - centre[0][0]) / 1000) / 25) + ((np.abs(grille.YCOORD - centre[0][1]) / 1000) / WALKING_SPEED)) * (income / (24 * 365))) + monetary_cost_pt
+            prix_transit = np.nanmin(np.vstack((prix_transit, price_north_axis, price_east_axis)), axis = 0)
+        elif city == 'Buenos_Aires' or city == 'Yerevan':
+            prix_transit = ((transit.Duration) * income / (3600 * 24) / 365) + monetary_cost_pt
+            price_north_axis = ((((np.abs(grille.XCOORD - centre[0][3]) / 1000) / WALKING_SPEED) + ((np.abs(grille.YCOORD - centre[0][4]) / 1000) / 25)) * (income / (24 * 365))) + monetary_cost_pt
+            price_east_axis = ((((np.abs(grille.XCOORD - centre[0][3]) / 1000) / 25) + ((np.abs(grille.YCOORD - centre[0][4]) / 1000) / WALKING_SPEED)) * (income / (24 * 365))) + monetary_cost_pt
+            prix_transit = np.nanmin(np.vstack((prix_transit, price_north_axis, price_east_axis)), axis = 0)
+        else:
+            prix_transit = ((transit.Duration) * income / (3600 * 24) / 365) + monetary_cost_pt
+            price_north_axis = ((((np.abs(grille.XCOORD - centre[0][1]) / 1000) / WALKING_SPEED) + ((np.abs(grille.YCOORD - centre[0][2]) / 1000) / 25)) * (income / (24 * 365))) + monetary_cost_pt
+            price_east_axis = ((((np.abs(grille.XCOORD - centre[0][1]) / 1000) / 25) + ((np.abs(grille.YCOORD - centre[0][2]) / 1000) / WALKING_SPEED)) * (income / (24 * 365))) + monetary_cost_pt
+            prix_transit = np.nanmin(np.vstack((prix_transit, price_north_axis, price_east_axis)), axis = 0)
+
+    else:
+        prix_transit = ((transit.Duration) * income / (3600 * 24) / 365) + monetary_cost_pt
+    prix_walking = ((distance_cbd) / WALKING_SPEED) * (income / (24 * 365))
+    prix_walking[distance_cbd > 8] = math.inf
+    tous_prix=np.vstack((prix_driving,prix_transit, prix_walking))
+    prix_transport=np.amin(tous_prix, axis=0)
+    prix_transport[np.isnan(prix_transit)]=np.amin(np.vstack((prix_driving[np.isnan(prix_transit)], prix_walking[np.isnan(prix_transit)])), axis = 0)
+    prix_transport=prix_transport*2*365
+    prix_transport=pd.Series(prix_transport)
+    mode_choice=np.argmin(tous_prix, axis=0)
+    mode_choice[np.isnan(prix_transit) & (prix_driving < prix_walking)] = 0
+    mode_choice[np.isnan(prix_transit) & (prix_driving > prix_walking)] = 2
+    return prix_transport, mode_choice, prix_driving, prix_transit, prix_walking
 
 
 def transport_modeling_all_welfare_increasing(driving, transit, income, fuel_price, fuel_consumption, FIXED_COST_CAR, monetary_cost_pt, distance_cbd, WALKING_SPEED, policy_brt, index, city, grille, centre, orig_dist, target_dist, transit_dist, BRT_SPEED):
@@ -155,5 +196,43 @@ def transport_modeling_all_welfare_increasing(driving, transit, income, fuel_pri
     mode_choice[np.isnan(prix_transit) & (prix_driving < prix_walking)] = 0
     mode_choice[np.isnan(prix_transit) & (prix_driving > prix_walking)] = 2
     return prix_transport, mode_choice
+
+def transport_modeling_all_welfare_increasing_bis(driving, transit, income, fuel_price, fuel_consumption, FIXED_COST_CAR, monetary_cost_pt, distance_cbd, WALKING_SPEED, policy_brt, index, city, grille, centre, orig_dist, target_dist, transit_dist, BRT_SPEED, alpha_cong, beta_cong, Q):
+    #prix_driving = driving.Duration * income / (3600 * 24) / 365 + driving.Distance * fuel_price * fuel_consumption / 100000 + FIXED_COST_CAR
+    duration_with_cong = 3600 * ((driving.Distance / 1000) / (alpha_cong - (beta_cong * Q)))
+    prix_driving = duration_with_cong * income / (3600 * 24) / 365 + driving.Distance * fuel_price * fuel_consumption / 100000 + FIXED_COST_CAR
+    
+    if ((policy_brt == True) & (index > 4)):
+        #prix_transit = ((transit.Duration) * income / (3600 * 24) / 365) + monetary_cost_pt
+        #prix_BRT = (((((orig_dist + target_dist) / (WALKING_SPEED * 1000)) + ((transit_dist / 1000) / BRT_SPEED)) * (income / (24 * 365))) + monetary_cost_pt).squeeze()
+        #prix_transit = np.nanmin(np.vstack((prix_transit, prix_BRT)), axis = 0)
+        if city == 'Prague' or city == 'Tianjin' or city == 'Paris':
+            prix_transit = ((transit.Duration) * income / (3600 * 24) / 365) + monetary_cost_pt
+            price_north_axis = ((((np.abs(grille.XCOORD - centre[0][0]) / 1000) / WALKING_SPEED) + ((np.abs(grille.YCOORD - centre[0][1]) / 1000) / 25)) * (income / (24 * 365))) + monetary_cost_pt
+            price_east_axis = ((((np.abs(grille.XCOORD - centre[0][0]) / 1000) / 25) + ((np.abs(grille.YCOORD - centre[0][1]) / 1000) / WALKING_SPEED)) * (income / (24 * 365))) + monetary_cost_pt
+            prix_transit = np.nanmin(np.vstack((prix_transit, price_north_axis, price_east_axis)), axis = 0)
+        elif city == 'Buenos_Aires' or city == 'Yerevan':
+            prix_transit = ((transit.Duration) * income / (3600 * 24) / 365) + monetary_cost_pt
+            price_north_axis = ((((np.abs(grille.XCOORD - centre[0][3]) / 1000) / WALKING_SPEED) + ((np.abs(grille.YCOORD - centre[0][4]) / 1000) / 25)) * (income / (24 * 365))) + monetary_cost_pt
+            price_east_axis = ((((np.abs(grille.XCOORD - centre[0][3]) / 1000) / 25) + ((np.abs(grille.YCOORD - centre[0][4]) / 1000) / WALKING_SPEED)) * (income / (24 * 365))) + monetary_cost_pt
+            prix_transit = np.nanmin(np.vstack((prix_transit, price_north_axis, price_east_axis)), axis = 0)
+        else:
+            prix_transit = ((transit.Duration) * income / (3600 * 24) / 365) + monetary_cost_pt
+            price_north_axis = ((((np.abs(grille.XCOORD - centre[0][1]) / 1000) / WALKING_SPEED) + ((np.abs(grille.YCOORD - centre[0][2]) / 1000) / 25)) * (income / (24 * 365))) + monetary_cost_pt
+            price_east_axis = ((((np.abs(grille.XCOORD - centre[0][1]) / 1000) / 25) + ((np.abs(grille.YCOORD - centre[0][2]) / 1000) / WALKING_SPEED)) * (income / (24 * 365))) + monetary_cost_pt
+            prix_transit = np.nanmin(np.vstack((prix_transit, price_north_axis, price_east_axis)), axis = 0)
+    else:
+        prix_transit = ((transit.Duration) * income / (3600 * 24) / 365) + monetary_cost_pt
+    prix_walking = ((distance_cbd) / WALKING_SPEED) * (income / (24 * 365))
+    prix_walking[distance_cbd > 8] = math.inf
+    tous_prix=np.vstack((prix_driving,prix_transit, prix_walking))
+    prix_transport=np.amin(tous_prix, axis=0)
+    prix_transport[np.isnan(prix_transit)]=np.amin(np.vstack((prix_driving[np.isnan(prix_transit)], prix_walking[np.isnan(prix_transit)])), axis = 0)
+    prix_transport=prix_transport*2*365
+    prix_transport=pd.Series(prix_transport)
+    mode_choice=np.argmin(tous_prix, axis=0)
+    mode_choice[np.isnan(prix_transit) & (prix_driving < prix_walking)] = 0
+    mode_choice[np.isnan(prix_transit) & (prix_driving > prix_walking)] = 2
+    return prix_transport, mode_choice, prix_driving, prix_transit, prix_walking
 
 

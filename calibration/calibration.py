@@ -22,35 +22,11 @@ def calibration2(city, rent, density, size, trans_price, INTEREST_RATE, selected
               (0.001,0.95), #b
               (0.000001, None) #kappa
               )
-    #if ((city == "Nottingham") | (city == "Oslo") | (city == 'Tampere') | (city == 'Patras')):
-    #    bounds = ((0.001,None), #Ro
-    #          (0.0,0.95), #b
-    #          (0.000001, None) #kappa
-    #          )
-       
-    if (city == 'Isfahan'):
-        bounds = ((0.1,0.99),
-                  (0.001,None), #Ro
-                  (0.001,0.99), #b
-                  (0.00000001, 1000) #kappa
-                  )
-        
-   # if (city == 'Brisbane'):
-   #     bounds = ((0.1,0.99),
-   #               (0.001,None), #Ro
-   #               (0.001,0.95), #b
-   #               (0.000001, 10) #kappa
-   #               )
     
     X0 = np.array([0.25, #beta
                    np.percentile(rent[selected_cells], 98), #Ro
                    0.64, #b
                    0.25] ) 
-    
-    #if ((city == 'Riga') | (city == 'Salvador') |(city == 'Sao_Paulo')):
-    #    X0 = np.array([np.percentile(rent[selected_cells], 80), #Ro
-    #               0.64, #b
-    #               0.25] ) 
     
     def minus_log_likelihood(X0):
         print(X0)

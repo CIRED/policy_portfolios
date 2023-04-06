@@ -31,14 +31,14 @@ path_data = "C:/Users/charl/OneDrive/Bureau/City_dataStudy/"
 path_folder = "C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Data/"
 path_calibration = "C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/final_results/calibration_20211124/"
 #os.mkdir(path_calibration)
-path_outputs = "C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/BAU_20221218/"
-os.mkdir(path_outputs)
+path_outputs = "C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/robustness_UGB_20230106/"
+#os.mkdir(path_outputs)
 path_street_network="C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Data/street_network/"
 
 # Choose options
 option = {}
 option["do_calibration"] = False #True to recalibrate the model for each city
-option["validation"] = 0 #1 to assess the calibration
+option["validation"] = 0 #1 to validate the calibration
 option["add_residuals"] = True
 
 # Choose policy options
@@ -47,7 +47,7 @@ option_ugb = "predict_urba" #Choose one between: predict_urba (main results), de
 BRT_scenario = 'speed_40_0_12_50_5' #Choose one between: speed_40_0_12_50_5, baseline_25_0_12_50_5, capital_evolution_25_0_12_50_income, capital_evolution_25_0_12_15_income
 
 # Choose fuel-technology scenario
-FUEL_EFFICIENCY_DECREASE = 0.963
+FUEL_EFFICIENCY_DECREASE = 0.98
 BASELINE_EFFICIENCY_DECREASE = 0.99
 LIFESPAN = 15
 
@@ -88,27 +88,6 @@ for city in np.delete(np.unique(list_city.City), 153):
     size = rents_and_size.medSize
     if (city == 'Mashhad') |(city == 'Isfahan') | (city == 'Tehran'):
         rent = 100 * rent
-    if city == "Abidjan":
-        rent[size > 100] = np.nan
-        size[size > 100] = np.nan
-    if (city == "Casablanca") | (city == "Yerevan"):
-        rent[size > 100] = np.nan
-        size[size > 100] = np.nan
-    if city == "Toluca":
-        rent[size > 250] = np.nan
-        size[size > 250] = np.nan
-    if (city == "Manaus")| (city == "Rabat")| (city == "Sao_Paulo"):
-        rent[rent > 200] = np.nan
-        size[rent > 200] = np.nan
-    if (city == "Salvador"):
-        rent[rent > 250] = np.nan
-        size[rent > 250] = np.nan
-    if (city == "Karachi") | (city == "Lahore"):
-        rent[size > 200] = np.nan
-        size[size > 200] = np.nan
-    if city == "Addis_Ababa":
-        rent[rent > 400] = rent / 100
-        size = size / 10
     size.mask((size > 1000), inplace = True)
     
     # Import agricultural rent and land-use data
@@ -176,8 +155,8 @@ for city in np.delete(np.unique(list_city.City), 153):
     print("\n** Transport modelling **\n")
     
     # Model transport
-    prix_transport, mode_choice = transport_modeling(driving, transit, income, fuel_price, fuel_consumption, FIXED_COST_CAR, monetary_cost_pt, distance_cbd, WALKING_SPEED, policy, index, city, grille, centre, orig_dist, target_dist, transit_dist, BRT_SPEED)
-    
+    prix_transport, mode_choice, prix_driving, prix_transit, prix_walking = transport_modeling(driving, transit, income, fuel_price, fuel_consumption, FIXED_COST_CAR, monetary_cost_pt, distance_cbd, WALKING_SPEED, policy, index, city, grille, centre, orig_dist, target_dist, transit_dist, BRT_SPEED)
+
     # Model the costs of the BRT policy
     if (policy == 'BRT') | (policy == 'synergy'):        
         BRT_OPERATING_COST = BRT_OPERATING_COST * length_network / 1000
@@ -392,7 +371,7 @@ for city in np.delete(np.unique(list_city.City), 153):
     save_modal_shares[0] = mode_choice
     
     # Compute welfare and health co-benefits
-    welfare, air_pollution, active_modes, noise, car_accidents = compute_total_welfare2(income, prix_transport, simul_rent, simul_size, BETA, simul_density, mode_choice, distance_cbd, WALKING_SPEED, country, path_folder, 2015 + index, region, FUEL_EFFICIENCY_DECREASE, BASELINE_EFFICIENCY_DECREASE, LIFESPAN, imaclim, policy, cobenefits = True)
+    welfare, air_pollution, active_modes, noise, car_accidents = compute_total_welfare2(income, prix_transport, simul_rent, simul_size, BETA, simul_density, mode_choice, distance_cbd, WALKING_SPEED, country, path_folder, 2015 + index, region, FUEL_EFFICIENCY_DECREASE, BASELINE_EFFICIENCY_DECREASE, LIFESPAN, imaclim, policy, cobenefits = True)  
     
     #### SIMULATIONS
     
@@ -406,7 +385,6 @@ for city in np.delete(np.unique(list_city.City), 153):
         income = income * (income_growth[2015 + index] / income_growth[2015 + index - 1])
         kappa = update_kappa(kappa, save_income[index-1], income, B)
         agricultural_rent = agricultural_rent * (income_growth[2015 + index] / income_growth[2015 + index - 1])
-        CO2_emissions_car = 2300 * fuel_consumption / 100
         #fuel_price = fuel_price * (income_growth[2015 + index] / income_growth[2015 + index - 1])
         #monetary_cost_pt = monetary_cost_pt * (income_growth[2015 + index] / income_growth[2015 + index - 1])
         #capital_cost_BRT
@@ -432,21 +410,26 @@ for city in np.delete(np.unique(list_city.City), 153):
         
         if (policy == 'carbon_tax') | (policy == 'synergy'):
             if index == 5:
-                fuel_price = fuel_price *1.3
+                fuel_price = fuel_price *1.1
+                
+        CO2_emissions_car = 2300 * fuel_consumption / 100
+                
+        # Model transport
+        prix_transport, mode_choice, prix_driving, prix_transit, prix_walking = transport_modeling(driving, transit, income, fuel_price, fuel_consumption, FIXED_COST_CAR, monetary_cost_pt, distance_cbd, WALKING_SPEED, policy, index, city, grille, centre, orig_dist, target_dist, transit_dist, BRT_SPEED)
         
         if policy == 'UGB':
             if index > 4:
                 if option_ugb == "predict_urba":
                     urban_footprint = predict_urbanized_area(density_to_cover, save_density[4])
-                    coeff_land = np.fmin(coeff_land, 0.62 * urban_footprint) 
+                    #coeff_land = np.fmin(coeff_land, 0.62 * urban_footprint) 
+                    coeff_land = np.fmin(coeff_land, (0.62 * urban_footprint) + mode_choice)
                 elif option_ugb == 'density':
-                    coeff_land[save_density[4] < 400] = 0
+                    #coeff_land[save_density[4] < 400] = 0
+                    coeff_land[(save_density[4] < 400) & (mode_choice == 0)] = 0
                 elif option_ugb == 'data_urba':
                     coeff_land = np.fmin(coeff_land, 0.62 * land_cover_ESACCI.ESACCI190 / land_cover_ESACCI.AREA)
-                
-        # Model transport
-        prix_transport, mode_choice = transport_modeling(driving, transit, income, fuel_price, fuel_consumption, FIXED_COST_CAR, monetary_cost_pt, distance_cbd, WALKING_SPEED, policy, index, city, grille, centre, orig_dist, target_dist, transit_dist, BRT_SPEED)
-          
+
+                  
         ### COMPUTE EQUILIBRIUM WITHOUT INERTIA
         
         if ((policy == 'BRT') & (index > 4)) | ((policy == 'synergy') & (index > 4)):
@@ -604,7 +587,7 @@ for city in np.delete(np.unique(list_city.City), 153):
     ### EXPORT OUTPUTS
     
     # Export plots
-    plot_emissions_and_welfare(save_emissions_per_capita, save_total_welfare, save_total_welfare_with_cobenefits, path_outputs, city)      
+    #plot_emissions_and_welfare(save_emissions_per_capita, save_total_welfare, save_total_welfare_with_cobenefits, path_outputs, city)      
     
     # Save outputs
     save_outputs(save_emissions, save_emissions_per_capita, save_population, save_R0, save_rent, save_dwelling_size, save_density, save_avg_utility, save_total_welfare, save_total_welfare_with_cobenefits, save_income, save_urbanized_area, save_distance, save_modal_shares, path_outputs, city)

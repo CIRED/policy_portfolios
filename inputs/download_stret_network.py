@@ -13,6 +13,15 @@ Created on Fri Apr  9 12:26:26 2021
 """
 
 
+from inputs.transport import *
+from inputs.parameters import *
+from outputs.outputs import *
+from model.model import *
+from inputs.land_use import *
+from inputs.geo_data import *
+from inputs.data import *
+from calibration.validation import *
+from calibration.calibration import *
 import pandas as pd
 import numpy as np
 import scipy as sc
@@ -20,12 +29,8 @@ import matplotlib.pyplot as plt
 import math
 import os
 
-BRT_scenario = 'speed_40_0_12_50_5'
 
-#'baseline_25_0_12_50_5'
-#'speed_40_0_12_50_5'
-#capital_evolution_25_0_12_50_income
-#capital_evolution_25_0_12_15_income
+BRT_scenario = 'speed_40_0_12_50_5'
 
 option_ugb = "predict_urba" #density, data_urba, predict_urba. Résultats actuels avec predict_urba
 
@@ -37,21 +42,8 @@ path_data = "C:/Users/charl/OneDrive/Bureau/City_dataStudy/"
 path_folder = "C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Data/"
 path_calibration = "C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/calibration_20211124/" #calibration_20211124
 #os.mkdir(path_calibration)
-#path_outputs = "C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/" + BRT_scenario + '/'
-#path_outputs = "C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/sensitivity/kappa_agri_rent/kappa/BAU/"
-#path_outputs = "C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/BAU_resid4_predict_urba/"
 path_outputs = "C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Data/street_network/"
 #os.mkdir(path_outputs)
-
-from calibration.calibration import *
-from calibration.validation import *
-from inputs.data import *
-from inputs.geo_data import *
-from inputs.land_use import *
-from model.model import *
-from outputs.outputs import *
-from inputs.parameters import *
-from inputs.transport import *
 
 option = {}
 option["validation"] = 0
@@ -85,13 +77,7 @@ if option["validation"] == 1:
      rae_density1, rae_rent1, rae_size1, rae_density2, rae_rent2, 
      rae_size2) = initialize_dict()
 
-#df_cobenefits = pd.DataFrame(columns = ['City', 'Pol', 'cost_air_pollution', 'cost_active_modes', 'cost_noise', 
-#                                        'cost_accidents', 'total_cost', 'emissions', 'avg_utility', 
-#                                        'welfare_with_cobenefits', 'welfare_without_cobenefits', 'city_GDP'],
-#                             index = [sub + '_baseline' for sub in np.unique(list_city.City)] + [sub + '_carbon_tax' for sub in np.unique(list_city.City)] + [sub + '_BRT' for sub in np.unique(list_city.City)] + [sub + '_fuel_effiency' for sub in np.unique(list_city.City)] + [sub + '_UGB' for sub in np.unique(list_city.City)])
-
-for city in np.delete(np.unique(list_city.City), 153)[152:192]: #[0:146][152:192]
-#for city in ["Turku"]:
+for city in np.delete(np.unique(list_city.City), 153): 
     
     print("\n*** " + city + " ***\n")
     index = 0
@@ -133,9 +119,6 @@ for city in np.delete(np.unique(list_city.City), 153)[152:192]: #[0:146][152:192
         rent[rent > 400] = rent / 100
         size = size / 10
     size.mask((size > 1000), inplace = True)
-    #informal_housing_city = informal_housing.informal_housing[informal_housing.City == city]
-    #rent = (rentemp_capita_ppp.city == city].squeeze() == "WB":
-    #    income = income * 1.33
     agricultural_rent = import_agricultural_rent(path_folder, country)
     population = np.nansum(density)
     region = pd.read_excel(path_folder + "city_country_region.xlsx").region[pd.read_excel(path_folder + "city_country_region.xlsx").city == city].squeeze()

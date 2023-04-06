@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Aug 30 14:28:49 2022
+Created on Fri Apr  9 12:26:26 2021
 
 @author: charl
 """
@@ -18,18 +18,21 @@ from calibration.validation import *
 from inputs.data import *
 from inputs.geo_data import *
 from inputs.land_use import *
-from model.model import *
-from outputs.outputs import *
 from inputs.parameters import *
 from inputs.transport import *
+from model.model import *
+from outputs.scipy_help import _centered
+import scipy.signal.signaltools
+scipy.signal.signaltools._centered = _centered
+from outputs.outputs import *
 
 # Define path
 path_data = "C:/Users/charl/OneDrive/Bureau/City_dataStudy/"
 path_folder = "C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Data/"
-path_calibration = "C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/calibration_20211124/" #calibration_20211124
+path_calibration = "C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/final_results/calibration_20211124/"
 #os.mkdir(path_calibration)
-path_outputs = "C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/all_welfare_increasing_robustness/"
-#os.mkdir(path_outputs)
+path_outputs = "C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/BRT_congestion2/"
+os.mkdir(path_outputs)
 path_street_network="C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Data/street_network/"
 
 # Choose options
@@ -39,11 +42,12 @@ option["validation"] = 0 #1 to assess the calibration
 option["add_residuals"] = True
 
 # Choose policy options
-option_ugb = "density" #Choose one between: predict_urba (main results), density (robustness), data_urba
+policy = 'BRT'
+option_ugb = "predict_urba" #Choose one between: predict_urba (main results), density (robustness), data_urba
 BRT_scenario = 'speed_40_0_12_50_5' #Choose one between: speed_40_0_12_50_5, baseline_25_0_12_50_5, capital_evolution_25_0_12_50_income, capital_evolution_25_0_12_15_income
 
 # Choose fuel-technology scenario
-FUEL_EFFICIENCY_DECREASE = 0.98
+FUEL_EFFICIENCY_DECREASE = 0.963
 BASELINE_EFFICIENCY_DECREASE = 0.99
 LIFESPAN = 15
 
@@ -63,34 +67,15 @@ if option["validation"] == 1:
      rae_density1, rae_rent1, rae_size1, rae_density2, rae_rent2, 
      rae_size2) = initialize_dict()
 
-results_by_pol = pd.read_excel('C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Rendus_20220831/results_robustness_20220913.xlsx', header = 0, index_col = 0)
+sample = pd.read_excel(path_folder + "congestion.xlsx")
 
 # Loop to run the model on all cities
-for city in results_by_pol.City:
+#for city in np.delete(np.unique(list_city.City), 153):
+for city in sample.City:
     
     print("\n*** " + city + " ***\n")
     index = 0
 
-    if results_by_pol.welfare_2035_CT_var.loc[results_by_pol.City == city].squeeze() >0:
-        policy_ct= True
-    else:
-        policy_ct=False
-        
-    if results_by_pol.welfare_2035_FE_var.loc[results_by_pol.City == city].squeeze() >0:
-        policy_fe= True
-    else:
-        policy_fe = False
-        
-    if results_by_pol.welfare_2035_UGB_var.loc[results_by_pol.City == city].squeeze() >0:
-        policy_ugb = True
-    else:
-        policy_ugb = False
-        
-    if results_by_pol.welfare_2035_BRT_var.loc[results_by_pol.City == city].squeeze() >0:
-        policy_brt = True
-    else:
-        policy_brt = False
-        
     ### IMPORT DATA
     
     print("\n** Import data **\n")
@@ -106,27 +91,6 @@ for city in results_by_pol.City:
     size = rents_and_size.medSize
     if (city == 'Mashhad') |(city == 'Isfahan') | (city == 'Tehran'):
         rent = 100 * rent
-    if city == "Abidjan":
-        rent[size > 100] = np.nan
-        size[size > 100] = np.nan
-    if (city == "Casablanca") | (city == "Yerevan"):
-        rent[size > 100] = np.nan
-        size[size > 100] = np.nan
-    if city == "Toluca":
-        rent[size > 250] = np.nan
-        size[size > 250] = np.nan
-    if (city == "Manaus")| (city == "Rabat")| (city == "Sao_Paulo"):
-        rent[rent > 200] = np.nan
-        size[rent > 200] = np.nan
-    if (city == "Salvador"):
-        rent[rent > 250] = np.nan
-        size[rent > 250] = np.nan
-    if (city == "Karachi") | (city == "Lahore"):
-        rent[size > 200] = np.nan
-        size[size > 200] = np.nan
-    if city == "Addis_Ababa":
-        rent[rent > 400] = rent / 100
-        size = size / 10
     size.mask((size > 1000), inplace = True)
     
     # Import agricultural rent and land-use data
@@ -145,20 +109,27 @@ for city in results_by_pol.City:
     monetary_cost_pt = import_public_transport_cost_data(path_folder, city).squeeze()
         
     # Import street network
-    if policy_brt == True:
+    if (policy == 'BRT') | (policy == 'synergy'):
+        orig_dist = np.load(path_street_network + city + "_orig_dist.npy")
+        target_dist = np.load(path_street_network + city + "_target_dist.npy")
+        transit_dist = np.load(path_street_network + city + "_transit_dist.npy")
+        length_network = np.load(path_street_network + city + "_length_network.npy")
+        #orig_dist, target_dist, transit_dist, length_network = import_street_network(list_city, city, country, proj, centre, path_folder, path_data)
+    else:
         orig_dist = np.nan
         target_dist = np.nan
         transit_dist = np.nan
+        
+    # Import BRT parameters
+    BRT_SPEED, BRT_OPERATING_COST, BRT_CAPITAL_COST, option_capital_cost_evolution = import_BRT_parameters(BRT_scenario)
+    
+    # Import parameters for the policy "basic infra"
+    if policy == "basic_infra":
         BRT_SPEED = 25
         BRT_OPERATING_COST = 0
         BRT_CAPITAL_COST = 12230000
         option_capital_cost_evolution = 0
         length_network = 0
-    else:
-        orig_dist = np.nan
-        target_dist = np.nan
-        transit_dist = np.nan
-        BRT_SPEED = 0
         
     # Create bus network for the policy "basic infra"
     if city == 'Prague' or city == 'Tianjin' or city == 'Paris':
@@ -187,10 +158,44 @@ for city in results_by_pol.City:
     print("\n** Transport modelling **\n")
     
     # Model transport
-    prix_transport, mode_choice = transport_modeling_all_welfare_increasing(driving, transit, income, fuel_price, fuel_consumption, FIXED_COST_CAR, monetary_cost_pt, distance_cbd, WALKING_SPEED, policy_brt, index, city, grille, centre, orig_dist, target_dist, transit_dist, BRT_SPEED)
-    
+    prix_transport, mode_choice, prix_driving, prix_transit, prix_walking = transport_modeling(driving, transit, income, fuel_price, fuel_consumption, FIXED_COST_CAR, monetary_cost_pt, distance_cbd, WALKING_SPEED, policy, index, city, grille, centre, orig_dist, target_dist, transit_dist, BRT_SPEED)
+
     # Model the costs of the BRT policy
-    if policy_brt == True:
+    if (policy == 'BRT') | (policy == 'synergy'):        
+        BRT_OPERATING_COST = BRT_OPERATING_COST * length_network / 1000
+        BRT_CAPITAL_COST = BRT_CAPITAL_COST * length_network / 1000   
+        x = pd.Series({i: 1.767283 / (1.015 ** (2050 - i)) for i in range(2051, 2071)})
+        income_growth = income_growth.append(x)         
+        def compute_value_BRT(cost_per_year):
+            if option_capital_cost_evolution == '50years_5percent':
+                year_array = np.arange(0, 50)
+                estimated_cost = sum(cost_per_year / (1.05 ** year_array))
+            elif option_capital_cost_evolution == '15years_5percent':
+                year_array = np.arange(0, 16)
+                estimated_cost = sum(cost_per_year / (1.05 ** year_array)) 
+            elif option_capital_cost_evolution == 'prop_income_50':
+                year_array = np.arange(0, 50)
+                estimated_cost = sum(cost_per_year * (income_growth[2020 + year_array] / income_growth[2020]))
+            elif option_capital_cost_evolution == 'prop_income_15':
+                year_array = np.arange(0, 16)
+                estimated_cost = sum(cost_per_year * (income_growth[2020 + year_array] / income_growth[2020]))
+            return np.abs(BRT_CAPITAL_COST - estimated_cost)
+        capital_cost_year_one = sc.optimize.fsolve(compute_value_BRT, 50000000)
+        if option_capital_cost_evolution == '50years_5percent':
+            year_array = np.arange(0, 50)
+            array_BRT_capital_cost = capital_cost_year_one / (1.05 ** year_array)
+        elif option_capital_cost_evolution == '15years_5percent':
+            year_array = np.arange(0, 16)
+            array_BRT_capital_cost = capital_cost_year_one / (1.05 ** year_array)
+        elif option_capital_cost_evolution == 'prop_income_50':
+            year_array = np.arange(0, 50)
+            array_BRT_capital_cost = capital_cost_year_one * (income_growth[2020 + year_array] / income_growth[2020])
+        elif option_capital_cost_evolution == 'prop_income_15':
+            year_array = np.arange(0, 16)
+            array_BRT_capital_cost = capital_cost_year_one * (income_growth[2020 + year_array] / income_growth[2020])
+    
+    # Model the costs of the policy "basic infra"
+    if policy == "basic_infra":
         BRT_OPERATING_COST = BRT_OPERATING_COST * length_network / 1000
         BRT_CAPITAL_COST = BRT_CAPITAL_COST * length_network / 1000   
         x = pd.Series({i: 1.767283 / (1.015 ** (2050 - i)) for i in range(2051, 2071)})
@@ -202,7 +207,7 @@ for city in results_by_pol.City:
         capital_cost_year_one = sc.optimize.fsolve(compute_value_BRT, 50000000)
         year_array = np.arange(0, 50)
         array_BRT_capital_cost = capital_cost_year_one / (1.05 ** year_array)
-        
+    
     ### CALIBRATION AND PARAMETERS
     
     print("\n** Calibration and parameters **\n")
@@ -213,19 +218,40 @@ for city in results_by_pol.City:
                                   & rent.notnull()  & (rent!=0)
                                   & size.notnull()  & (size!=0)
                                   & (~np.isnan(density)) & (density!=0) & (land_cover_ESACCI.ESACCI190 > 500000))
-    
+     
+    if city == 'Brisbane':
+        selected_cells = np.array(prix_transport.notnull() & (prix_transport!=0)
+                                      & coeff_land.notnull()  & (coeff_land !=0)
+                                      & rent.notnull()  & (rent!=0)
+                                      & size.notnull()  & (size!=0) & (distance_cbd < 60)
+                                      & (~np.isnan(density)) & (density!=0) & (land_cover_ESACCI.ESACCI190 > 500000))
+    if city == 'Athens':
+        selected_cells = np.array(prix_transport.notnull() & (prix_transport!=0)
+                                      & coeff_land.notnull()  & (coeff_land !=0)
+                                      & rent.notnull()  & (rent!=0)
+                                      & size.notnull()  & (size!=0)
+                                      & (~np.isnan(density)) & (density!=0) & (land_cover_ESACCI.ESACCI190 > 800000))
+     
+    if city == 'Los_Angeles':
+        selected_cells = np.array(prix_transport.notnull() & (prix_transport!=0)
+                                      & coeff_land.notnull()  & (coeff_land !=0)
+                                      & rent.notnull()  & (rent!=0)
+                                      & size.notnull()  & (size!=0)
+                                      & (~np.isnan(density)) & (density!=0) & (land_cover_ESACCI.ESACCI190 > 700000))
+     
+        
     selected_cells2 = np.array(prix_transport.notnull() & (prix_transport!=0)
                                   & coeff_land.notnull()  & (coeff_land !=0)
                                   & rent.notnull()  & (rent!=0)
                                   & size.notnull()  & (size!=0)
                                   & (~np.isnan(density)) & (density!=0))
     
-    density_max = np.nanmax(density)
+    density_max = np.nanmax(density) #we can also set density_max = 1000000000
         
     if option["do_calibration"] == True:
         
-        density_max = np.nanmax(density)
-        
+        density_max = np.nanmax(density) #we can also set density_max = 1000000000
+         
         # Do the calibration
         result_calibration = calibration2(city, rent, density, size, 
                                           prix_transport, INTEREST_RATE,
@@ -245,7 +271,7 @@ for city in results_by_pol.City:
         B = np.array(np.load(path_calibration + "b.npy", allow_pickle = True), ndmin = 1)[0][city]
         kappa = np.array(np.load(path_calibration + "kappa.npy", allow_pickle = True), ndmin = 1)[0][city]
         Ro = np.array(np.load(path_calibration + "Ro.npy", allow_pickle = True), ndmin = 1)[0][city]
-
+        
         if city == 'Brisbane':
             BETA = 0.40243545410275683
             B = 0.42321865026459043
@@ -271,9 +297,9 @@ for city in results_by_pol.City:
     if option["validation"] == 1: 
         
         ### VALIDATION
-       
+        
         print("export validation")
-       
+        
         # Compute validation metrics
         d_selected_cells[city] = sum(selected_cells2)
         d_income[city] = income      
@@ -293,7 +319,8 @@ for city in results_by_pol.City:
         # Export validation metrics
         save_outputs_validation(path_calibration, d_beta, d_b, d_kappa, d_Ro, d_share_transit, d_share_car, d_share_walking, d_emissions_per_capita, d_utility, d_income, d_selected_cells, d_corr_density0, d_corr_rent0, d_corr_size0, d_corr_density1, d_corr_rent1, d_corr_size1, d_corr_density2, d_corr_rent2, d_corr_size2, r2_density0, r2_rent0, r2_size0, r2_density1, r2_rent1, r2_size1, r2_density2, r2_rent2, r2_size2, mae_density0, mae_rent0, mae_size0, mae_density1, mae_rent1, mae_size1, mae_density2, mae_rent2, mae_size2, rae_density0, rae_rent0, rae_size0, rae_density1, rae_rent1, rae_size1, rae_density2, rae_rent2, rae_size2)
 
-    #Residuals
+
+    # Compute residuals
     residuals_for_simulation = compute_residuals(density, simul_density, rent, simul_rent, size, simul_size, option)
           
     #### INITIAL STATE
@@ -314,7 +341,7 @@ for city in results_by_pol.City:
         return delta_population
 
     # Compute the initial state by minimizing the difference between simulated and target population
-    R_0 = sc.optimize.fsolve(compute_residual, Ro) #432 / 458
+    R_0 = sc.optimize.fsolve(compute_residual, Ro)
     X0 = np.array([BETA, float(R_0), B, kappa])
     simul_rent, simul_size, simul_density = model2(X0, coeff_land, prix_transport, income, INTEREST_RATE, HOUSEHOLD_SIZE, agricultural_rent)
     simul_density[simul_density > density_max] = density_max
@@ -340,14 +367,29 @@ for city in results_by_pol.City:
     save_emissions[0] = compute_emissions(CO2_emissions_car, CO2_EMISSIONS_TRANSIT, simul_density, mode_choice, driving.Distance / 1000, transit.Distance / 1000)
     save_emissions_per_capita[0] = save_emissions[0] / population
     save_avg_utility[0] = compute_avg_utility(income, BETA, save_R0[0])
-    save_total_welfare[0] = compute_total_welfare_all_welfare_increasing(income, prix_transport, simul_rent, simul_size, BETA, simul_density, mode_choice, distance_cbd, WALKING_SPEED, country, path_folder, 2015 + index, region, FUEL_EFFICIENCY_DECREASE, BASELINE_EFFICIENCY_DECREASE, LIFESPAN, imaclim, policy_fe, cobenefits = False)
-    save_total_welfare_with_cobenefits[0] = compute_total_welfare_all_welfare_increasing(income, prix_transport, simul_rent, simul_size, BETA, simul_density, mode_choice, distance_cbd, WALKING_SPEED, country, path_folder, 2015 + index, region, FUEL_EFFICIENCY_DECREASE, BASELINE_EFFICIENCY_DECREASE, LIFESPAN, imaclim, policy_fe, cobenefits = True)
+    save_total_welfare[0] = compute_total_welfare(income, prix_transport, simul_rent, simul_size, BETA, simul_density, mode_choice, distance_cbd, WALKING_SPEED, country, path_folder, 2015 + index, region, FUEL_EFFICIENCY_DECREASE, BASELINE_EFFICIENCY_DECREASE, LIFESPAN, imaclim, policy, cobenefits = False)
+    save_total_welfare_with_cobenefits[0] = compute_total_welfare(income, prix_transport, simul_rent, simul_size, BETA, simul_density, mode_choice, distance_cbd, WALKING_SPEED, country, path_folder, 2015 + index, region, FUEL_EFFICIENCY_DECREASE, BASELINE_EFFICIENCY_DECREASE, LIFESPAN, imaclim, policy, cobenefits = True)
     save_urbanized_area[0] = np.nansum(predict_urbanized_area(density_to_cover, save_density[0]))
     save_distance = distance_cbd
     save_modal_shares[0] = mode_choice
-     
+    
     # Compute welfare and health co-benefits
-    welfare, air_pollution, active_modes, noise, car_accidents = compute_total_welfare2_all_welfare_increasing(income, prix_transport, simul_rent, simul_size, BETA, simul_density, mode_choice, distance_cbd, WALKING_SPEED, country, path_folder, 2015 + index, region, FUEL_EFFICIENCY_DECREASE, BASELINE_EFFICIENCY_DECREASE, LIFESPAN, imaclim, policy_fe, cobenefits = True)
+    welfare, air_pollution, active_modes, noise, car_accidents = compute_total_welfare2(income, prix_transport, simul_rent, simul_size, BETA, simul_density, mode_choice, distance_cbd, WALKING_SPEED, country, path_folder, 2015 + index, region, FUEL_EFFICIENCY_DECREASE, BASELINE_EFFICIENCY_DECREASE, LIFESPAN, imaclim, policy, cobenefits = True)
+    
+    def identify_congestion(mode_choice, simul_density, driving):
+        congestion = pd.read_excel(path_folder + "congestion.xlsx")
+        cong_level = congestion.loc[congestion.City == city, "congestion2019"].squeeze()
+        if np.isnan(cong_level):
+            cong_level = np.nanmedian(congestion.congestion2019)
+        s_2015 = ((driving.Distance / 1000) / (driving.Duration / 3600))
+        alpha_cong = (1 + (cong_level / 100)) * s_2015
+        #beta_cong = np.average(alpha_cong[(~np.isnan(s_2015))] - s_2015[(~np.isnan(s_2015))], weights = simul_density[(~np.isnan(s_2015))]) / np.nansum(simul_density[mode_choice == 0])
+        #beta_cong = (alpha_cong - s_2015) / np.nansum(simul_density[mode_choice == 0])
+        beta_cong = (alpha_cong - s_2015) / np.nansum(simul_density[mode_choice == 0] * driving.Distance[mode_choice == 0])
+        return alpha_cong, beta_cong
+    
+    alpha_cong, beta_cong = identify_congestion(mode_choice, simul_density, driving)
+    
     
     #### SIMULATIONS
     
@@ -355,53 +397,69 @@ for city in results_by_pol.City:
     
     while index < DURATION:
     
-        # Adjust parameters        
+        # Adjust parameters   
         index = index + 1
         population = update_population(population, population_growth, index)
         income = income * (income_growth[2015 + index] / income_growth[2015 + index - 1])
         kappa = update_kappa(kappa, save_income[index-1], income, B)
         agricultural_rent = agricultural_rent * (income_growth[2015 + index] / income_growth[2015 + index - 1])
-        CO2_emissions_car = 2300 * fuel_consumption / 100
         #fuel_price = fuel_price * (income_growth[2015 + index] / income_growth[2015 + index - 1])
         #monetary_cost_pt = monetary_cost_pt * (income_growth[2015 + index] / income_growth[2015 + index - 1])
         #capital_cost_BRT
         
         # Adjust policies
-        if policy_brt == True:
+        if ((policy == 'BRT') | (policy == 'synergy')):
+            BRT_OPERATING_COST = BRT_OPERATING_COST * (income_growth[2015 + index] / income_growth[2015 + index - 1])
+            if index > 4:
+                if (option_capital_cost_evolution == '50years_5percent') | (option_capital_cost_evolution == '15years_5percent'):
+                    BRT_CAPITAL_COST = array_BRT_capital_cost[index - 5]
+                elif (option_capital_cost_evolution == 'prop_income_50') | (option_capital_cost_evolution == 'prop_income_15'):
+                    BRT_CAPITAL_COST = array_BRT_capital_cost[2015 + index]
+        
+        if policy == "basic_infra":
             BRT_OPERATING_COST = BRT_OPERATING_COST * (income_growth[2015 + index] / income_growth[2015 + index - 1])
             if index > 4:
                 BRT_CAPITAL_COST = array_BRT_capital_cost[index - 5]
-
-        if ((policy_fe == True) & (index > 4)):
-            fuel_consumption = (((LIFESPAN - 1)/LIFESPAN) + ((1/LIFESPAN) * (BASELINE_EFFICIENCY_DECREASE ** (5 - index + 15)) * (FUEL_EFFICIENCY_DECREASE ** (index - 5)))) * fuel_consumption  
+        
+        if ((policy == 'fuel_efficiency') & (index > 4)):
+            fuel_consumption = (((LIFESPAN - 1)/LIFESPAN) + ((1/LIFESPAN) * (BASELINE_EFFICIENCY_DECREASE ** (5 - index + 15)) * (FUEL_EFFICIENCY_DECREASE ** (index - 5)))) * fuel_consumption      
         else:
             fuel_consumption = (((LIFESPAN - 1)/LIFESPAN) + ((BASELINE_EFFICIENCY_DECREASE ** LIFESPAN) /LIFESPAN)) * fuel_consumption
-            
-        if policy_ct == True:
-            if index == 5:
-                fuel_price = fuel_price*1.1
         
-        if policy_ugb == True:
+        if (policy == 'carbon_tax') | (policy == 'synergy'):
+            if index == 5:
+                fuel_price = fuel_price *1.3
+                
+        CO2_emissions_car = 2300 * fuel_consumption / 100
+                
+        # Model transport
+        #Q = np.nansum(save_density[index - 1, save_modal_shares[index - 1] == 0])
+        Q = np.nansum(save_density[index - 1, save_modal_shares[index - 1] == 0] * driving.Distance[save_modal_shares[index - 1] == 0])
+        
+        prix_transport, mode_choice, prix_driving, prix_transit, prix_walking = transport_modeling_bis(driving, transit, income, fuel_price, fuel_consumption, FIXED_COST_CAR, monetary_cost_pt, distance_cbd, WALKING_SPEED, policy, index, city, grille, centre, orig_dist, target_dist, transit_dist, BRT_SPEED, alpha_cong, beta_cong, Q)
+        
+        if policy == 'UGB':
             if index > 4:
                 if option_ugb == "predict_urba":
                     urban_footprint = predict_urbanized_area(density_to_cover, save_density[4])
-                    coeff_land = np.fmin(coeff_land, 0.62 * urban_footprint) 
+                    #coeff_land = np.fmin(coeff_land, 0.62 * urban_footprint) 
+                    coeff_land = np.fmin(coeff_land, (0.62 * urban_footprint) + mode_choice)
                 elif option_ugb == 'density':
-                    coeff_land[save_density[4] < 400] = 0
+                    #coeff_land[save_density[4] < 400] = 0
+                    coeff_land[(save_density[4] < 400) & (mode_choice == 0)] = 0
                 elif option_ugb == 'data_urba':
                     coeff_land = np.fmin(coeff_land, 0.62 * land_cover_ESACCI.ESACCI190 / land_cover_ESACCI.AREA)
-                
-        # Model transport
-        prix_transport, mode_choice = transport_modeling_all_welfare_increasing(driving, transit, income, fuel_price, fuel_consumption, FIXED_COST_CAR, monetary_cost_pt, distance_cbd, WALKING_SPEED, policy_brt, index, city, grille, centre, orig_dist, target_dist, transit_dist, BRT_SPEED)
-          
+                  
         ### COMPUTE EQUILIBRIUM WITHOUT INERTIA
         
-        if ((policy_brt == True) & (index > 4)):
+        if ((policy == 'BRT') & (index > 4)) | ((policy == 'synergy') & (index > 4)):
+            cost_BRT_per_pers = (BRT_OPERATING_COST + BRT_CAPITAL_COST) / population
+        elif ((policy == 'basic_infra') & (index > 4)):
             cost_BRT_per_pers = (BRT_OPERATING_COST + BRT_CAPITAL_COST) / population
         else:
             cost_BRT_per_pers = 0
             
-        if (((policy_ct == False)) | ((policy_ct == True) & (index < 5))):
+        if ((policy == 'None') | (policy == "UGB") | (policy == "fuel_efficiency") | (policy == 'BRT') | (policy == 'basic_infra') | ((policy == 'carbon_tax') & (index < 5)) | ((policy == 'synergy') & (index < 5))):           
             def compute_residual(ro):
                 simul_rent, simul_size, simul_density = model2(np.array([BETA, float(ro), B, kappa]), coeff_land, prix_transport, income - cost_BRT_per_pers, INTEREST_RATE, HOUSEHOLD_SIZE, agricultural_rent, housing_t0, 2)
                 if option["add_residuals"] == True:
@@ -414,7 +472,7 @@ for city in results_by_pol.City:
             R_0_without_inertia = sc.optimize.fsolve(compute_residual, R_0)          
             rent_without_inertia, dwelling_size_without_inertia, density_without_inertia = model2(np.array([BETA, R_0_without_inertia, B, kappa]), coeff_land, prix_transport, income - cost_BRT_per_pers, INTEREST_RATE, HOUSEHOLD_SIZE, agricultural_rent, housing_t0, 2)
            
-        elif ((policy_ct == True) & (policy_brt == False)& (index >4)):
+        elif ((policy == 'carbon_tax') & (index > 4)):
             def compute_residual(init_array):
                 ro = init_array[0]
                 agg_tax_input = init_array[1]
@@ -430,7 +488,7 @@ for city in results_by_pol.City:
             R_0_without_inertia, aggregated_tax_without_inertia = sc.optimize.fsolve(compute_residual, np.array([R_0.squeeze(), 0]))       
             rent_without_inertia, dwelling_size_without_inertia, density_without_inertia = model2(np.array([BETA, R_0_without_inertia, B, kappa]), coeff_land, prix_transport, income + (aggregated_tax_without_inertia / population), INTEREST_RATE, HOUSEHOLD_SIZE, agricultural_rent, housing_t0, 2)
         
-        elif ((policy_ct == True) & (policy_brt == True)& (index >4)):
+        elif ((policy == 'synergy') & (index > 4)):
             def compute_residual(init_array):
                 ro = init_array[0]
                 agg_tax_input = init_array[1]
@@ -447,6 +505,7 @@ for city in results_by_pol.City:
             rent_without_inertia, dwelling_size_without_inertia, density_without_inertia = model2(np.array([BETA, R_0_without_inertia, B, kappa]), coeff_land, prix_transport, income - cost_BRT_per_pers + (aggregated_tax_without_inertia / population), INTEREST_RATE, HOUSEHOLD_SIZE, agricultural_rent, housing_t0, 2)
       
         housing_without_inertia = density_without_inertia * dwelling_size_without_inertia
+        
         if option["add_residuals"] == True:
             rent_without_inertia = rent_without_inertia * np.exp(residuals_for_simulation.rent_residual)
             dwelling_size_without_inertia = dwelling_size_without_inertia * np.exp(residuals_for_simulation.size_residual)
@@ -457,7 +516,7 @@ for city in results_by_pol.City:
         
         housing_supply_t1 = compute_housing_supply(housing_without_inertia, housing_t0, TIME_LAG, DEPRECIATION_TIME)
             
-        if (((policy_ct == False)) | ((policy_ct == True) & (index < 5))):
+        if ((policy == 'None') | (policy == "UGB") | (policy == "fuel_efficiency") | (policy == 'BRT') | (policy == 'basic_infra') | ((policy == 'carbon_tax') & (index < 5)) | ((policy == 'synergy') & (index < 5))):
             def compute_residual(ro):
                 simul_rent, simul_size, simul_density = model2(np.array([BETA, float(ro), B, kappa]), coeff_land, prix_transport, income - cost_BRT_per_pers, INTEREST_RATE, HOUSEHOLD_SIZE, agricultural_rent, housing_supply_t1, 1)            
                 if option["add_residuals"] == True:
@@ -470,7 +529,7 @@ for city in results_by_pol.City:
             R_0 = sc.optimize.fsolve(compute_residual, R_0_without_inertia)     
             simul_rent, simul_size, simul_density = model2(np.array([BETA, float(R_0), B, kappa]), coeff_land, prix_transport, income - cost_BRT_per_pers, INTEREST_RATE, HOUSEHOLD_SIZE, agricultural_rent, housing_supply_t1, 1)
         
-        elif ((policy_ct == True) & (policy_brt == False)& (index >4)):
+        elif ((policy == 'carbon_tax') & (index > 4)):     
             def compute_residual(init_array):
                 ro = init_array[0]
                 agg_tax_input = init_array[1]
@@ -487,7 +546,7 @@ for city in results_by_pol.City:
             R_0, aggregated_tax = sc.optimize.fsolve(compute_residual, np.array([R_0_without_inertia, aggregated_tax_without_inertia]))        
             simul_rent, simul_size, simul_density = model2(np.array([BETA, float(R_0), B, kappa]), coeff_land, prix_transport, income + (aggregated_tax / population), INTEREST_RATE, HOUSEHOLD_SIZE, agricultural_rent, housing_supply_t1, 1)
         
-        elif ((policy_ct == True) & (policy_brt == True)& (index >4)):
+        elif ((policy == 'synergy') & (index > 4)):     
             def compute_residual(init_array):
                 ro = init_array[0]
                 agg_tax_input = init_array[1]
@@ -514,6 +573,157 @@ for city in results_by_pol.City:
             simul_size = simul_size * np.exp(residuals_for_simulation.size_residual)
             simul_density = simul_density * np.exp(residuals_for_simulation.density_residual)
     
+        print(np.nanmean(np.abs(beta_cong * (Q - np.nansum(simul_density[mode_choice == 0] * driving.Distance[mode_choice == 0])))))
+        
+        while np.nanmean(np.abs(beta_cong * (Q - np.nansum(simul_density[mode_choice == 0] * driving.Distance[mode_choice == 0])))) > 1:
+            print("try again")
+            print("Q:", Q)
+            print("new Q:", np.nansum(simul_density[mode_choice == 0]))
+            print("diff:", np.nanmean(np.abs(beta_cong * (Q - np.nansum(simul_density[mode_choice == 0])))))
+            #Q = (np.nansum(simul_density[mode_choice == 0]) + Q) / 2
+            
+            Q = (np.nansum(simul_density[mode_choice == 0] * driving.Distance[mode_choice == 0]) + Q) / 2
+            
+            
+            
+            prix_transport, mode_choice, prix_driving, prix_transit, prix_walking = transport_modeling_bis(driving, transit, income, fuel_price, fuel_consumption, FIXED_COST_CAR, monetary_cost_pt, distance_cbd, WALKING_SPEED, policy, index, city, grille, centre, orig_dist, target_dist, transit_dist, BRT_SPEED, alpha_cong, beta_cong, Q)
+            
+            if policy == 'UGB':
+                if index > 4:
+                    if option_ugb == "predict_urba":
+                        urban_footprint = predict_urbanized_area(density_to_cover, save_density[4])
+                        #coeff_land = np.fmin(coeff_land, 0.62 * urban_footprint) 
+                        coeff_land = np.fmin(coeff_land, (0.62 * urban_footprint) + mode_choice)
+                    elif option_ugb == 'density':
+                        #coeff_land[save_density[4] < 400] = 0
+                        coeff_land[(save_density[4] < 400) & (mode_choice == 0)] = 0
+                    elif option_ugb == 'data_urba':
+                        coeff_land = np.fmin(coeff_land, 0.62 * land_cover_ESACCI.ESACCI190 / land_cover_ESACCI.AREA)
+                      
+            ### COMPUTE EQUILIBRIUM WITHOUT INERTIA
+            
+            if ((policy == 'BRT') & (index > 4)) | ((policy == 'synergy') & (index > 4)):
+                cost_BRT_per_pers = (BRT_OPERATING_COST + BRT_CAPITAL_COST) / population
+            elif ((policy == 'basic_infra') & (index > 4)):
+                cost_BRT_per_pers = (BRT_OPERATING_COST + BRT_CAPITAL_COST) / population
+            else:
+                cost_BRT_per_pers = 0
+                
+            if ((policy == 'None') | (policy == "UGB") | (policy == "fuel_efficiency") | (policy == 'BRT') | (policy == 'basic_infra') | ((policy == 'carbon_tax') & (index < 5)) | ((policy == 'synergy') & (index < 5))):           
+                def compute_residual(ro):
+                    simul_rent, simul_size, simul_density = model2(np.array([BETA, float(ro), B, kappa]), coeff_land, prix_transport, income - cost_BRT_per_pers, INTEREST_RATE, HOUSEHOLD_SIZE, agricultural_rent, housing_t0, 2)
+                    if option["add_residuals"] == True:
+                        simul_rent = simul_rent * np.exp(residuals_for_simulation.rent_residual)
+                        simul_density = simul_density * np.exp(residuals_for_simulation.density_residual)
+                        simul_size = simul_size * np.exp(residuals_for_simulation.size_residual)
+                    delta_population = np.abs(population - np.nansum(simul_density))
+                    return delta_population   
+            
+                R_0_without_inertia = sc.optimize.fsolve(compute_residual, R_0)          
+                rent_without_inertia, dwelling_size_without_inertia, density_without_inertia = model2(np.array([BETA, R_0_without_inertia, B, kappa]), coeff_land, prix_transport, income - cost_BRT_per_pers, INTEREST_RATE, HOUSEHOLD_SIZE, agricultural_rent, housing_t0, 2)
+               
+            elif ((policy == 'carbon_tax') & (index > 4)):
+                def compute_residual(init_array):
+                    ro = init_array[0]
+                    agg_tax_input = init_array[1]
+                    simul_rent, simul_size, simul_density = model2(np.array([BETA, float(ro), B, kappa]), coeff_land, prix_transport, income + (agg_tax_input / population), INTEREST_RATE, HOUSEHOLD_SIZE, agricultural_rent, housing_t0, 2)
+                    if option["add_residuals"] == True:
+                        simul_rent = simul_rent * np.exp(residuals_for_simulation.rent_residual)
+                        simul_density = simul_density * np.exp(residuals_for_simulation.density_residual)
+                        simul_size = simul_size * np.exp(residuals_for_simulation.size_residual)
+                    delta_population = np.abs(population - np.nansum(simul_density))
+                    simul_agg_tax = 2*365 * (np.nansum(simul_density[mode_choice == 0] * driving.Distance[mode_choice == 0] / 1000) * ((0.3/1.3) * fuel_price * fuel_consumption / 100))
+                    delta_tax = np.abs(simul_agg_tax - agg_tax_input)
+                    return np.array([delta_population, delta_tax], dtype='float64')                          
+                R_0_without_inertia, aggregated_tax_without_inertia = sc.optimize.fsolve(compute_residual, np.array([R_0.squeeze(), 0]))       
+                rent_without_inertia, dwelling_size_without_inertia, density_without_inertia = model2(np.array([BETA, R_0_without_inertia, B, kappa]), coeff_land, prix_transport, income + (aggregated_tax_without_inertia / population), INTEREST_RATE, HOUSEHOLD_SIZE, agricultural_rent, housing_t0, 2)
+            
+            elif ((policy == 'synergy') & (index > 4)):
+                def compute_residual(init_array):
+                    ro = init_array[0]
+                    agg_tax_input = init_array[1]
+                    simul_rent, simul_size, simul_density = model2(np.array([BETA, float(ro), B, kappa]), coeff_land, prix_transport, income - cost_BRT_per_pers + (agg_tax_input / population), INTEREST_RATE, HOUSEHOLD_SIZE, agricultural_rent, housing_t0, 2)
+                    if option["add_residuals"] == True:
+                        simul_rent = simul_rent * np.exp(residuals_for_simulation.rent_residual)
+                        simul_density = simul_density * np.exp(residuals_for_simulation.density_residual)
+                        simul_size = simul_size * np.exp(residuals_for_simulation.size_residual)
+                    delta_population = np.abs(population - np.nansum(simul_density))
+                    simul_agg_tax = 2*365 * (np.nansum(simul_density[mode_choice == 0] * driving.Distance[mode_choice == 0] / 1000) * ((0.3/1.3) * fuel_price * fuel_consumption / 100))
+                    delta_tax = np.abs(simul_agg_tax - agg_tax_input)
+                    return np.array([delta_population, delta_tax], dtype='float64')                          
+                R_0_without_inertia, aggregated_tax_without_inertia = sc.optimize.fsolve(compute_residual, np.array([R_0.squeeze(), 0]))       
+                rent_without_inertia, dwelling_size_without_inertia, density_without_inertia = model2(np.array([BETA, R_0_without_inertia, B, kappa]), coeff_land, prix_transport, income - cost_BRT_per_pers + (aggregated_tax_without_inertia / population), INTEREST_RATE, HOUSEHOLD_SIZE, agricultural_rent, housing_t0, 2)
+          
+            housing_without_inertia = density_without_inertia * dwelling_size_without_inertia
+            
+            if option["add_residuals"] == True:
+                rent_without_inertia = rent_without_inertia * np.exp(residuals_for_simulation.rent_residual)
+                dwelling_size_without_inertia = dwelling_size_without_inertia * np.exp(residuals_for_simulation.size_residual)
+                density_without_inertia = density_without_inertia * np.exp(residuals_for_simulation.density_residual)
+            
+        
+            ### COMPUTE EQUILIBRIUM WITH INERTIA
+            
+            housing_supply_t1 = compute_housing_supply(housing_without_inertia, housing_t0, TIME_LAG, DEPRECIATION_TIME)
+                
+            if ((policy == 'None') | (policy == "UGB") | (policy == "fuel_efficiency") | (policy == 'BRT') | (policy == 'basic_infra') | ((policy == 'carbon_tax') & (index < 5)) | ((policy == 'synergy') & (index < 5))):
+                def compute_residual(ro):
+                    simul_rent, simul_size, simul_density = model2(np.array([BETA, float(ro), B, kappa]), coeff_land, prix_transport, income - cost_BRT_per_pers, INTEREST_RATE, HOUSEHOLD_SIZE, agricultural_rent, housing_supply_t1, 1)            
+                    if option["add_residuals"] == True:
+                        simul_rent = simul_rent * np.exp(residuals_for_simulation.rent_residual)
+                        simul_density = simul_density * np.exp(residuals_for_simulation.density_residual)
+                        simul_size = simul_size * np.exp(residuals_for_simulation.size_residual)
+                    delta_population = np.abs(population - np.nansum(simul_density))
+                    return delta_population
+                    
+                R_0 = sc.optimize.fsolve(compute_residual, R_0_without_inertia)     
+                simul_rent, simul_size, simul_density = model2(np.array([BETA, float(R_0), B, kappa]), coeff_land, prix_transport, income - cost_BRT_per_pers, INTEREST_RATE, HOUSEHOLD_SIZE, agricultural_rent, housing_supply_t1, 1)
+            
+            elif ((policy == 'carbon_tax') & (index > 4)):     
+                def compute_residual(init_array):
+                    ro = init_array[0]
+                    agg_tax_input = init_array[1]
+                    simul_rent, simul_size, simul_density = model2(np.array([BETA, float(ro), B, kappa]), coeff_land, prix_transport, income + (agg_tax_input / population), INTEREST_RATE, HOUSEHOLD_SIZE, agricultural_rent, housing_supply_t1, 1)            
+                    if option["add_residuals"] == True:
+                        simul_rent = simul_rent * np.exp(residuals_for_simulation.rent_residual)
+                        simul_density = simul_density * np.exp(residuals_for_simulation.density_residual)
+                        simul_size = simul_size * np.exp(residuals_for_simulation.size_residual)
+                    delta_population = np.abs(population - np.nansum(simul_density))
+                    simul_agg_tax = 2*365 * (np.nansum(simul_density[mode_choice == 0] * driving.Distance[mode_choice == 0] / 1000) * ((0.3/1.3) * fuel_price * fuel_consumption / 100))
+                    delta_tax = np.abs(simul_agg_tax - agg_tax_input)
+                    return np.array([delta_population, delta_tax], dtype='float64')
+            
+                R_0, aggregated_tax = sc.optimize.fsolve(compute_residual, np.array([R_0_without_inertia, aggregated_tax_without_inertia]))        
+                simul_rent, simul_size, simul_density = model2(np.array([BETA, float(R_0), B, kappa]), coeff_land, prix_transport, income + (aggregated_tax / population), INTEREST_RATE, HOUSEHOLD_SIZE, agricultural_rent, housing_supply_t1, 1)
+            
+            elif ((policy == 'synergy') & (index > 4)):     
+                def compute_residual(init_array):
+                    ro = init_array[0]
+                    agg_tax_input = init_array[1]
+                    simul_rent, simul_size, simul_density = model2(np.array([BETA, float(ro), B, kappa]), coeff_land, prix_transport, income - cost_BRT_per_pers + (agg_tax_input / population), INTEREST_RATE, HOUSEHOLD_SIZE, agricultural_rent, housing_supply_t1, 1)            
+                    if option["add_residuals"] == True:
+                        simul_rent = simul_rent * np.exp(residuals_for_simulation.rent_residual)
+                        simul_density = simul_density * np.exp(residuals_for_simulation.density_residual)
+                        simul_size = simul_size * np.exp(residuals_for_simulation.size_residual)
+                    delta_population = np.abs(population - np.nansum(simul_density))
+                    simul_agg_tax = 2*365 * (np.nansum(simul_density[mode_choice == 0] * driving.Distance[mode_choice == 0] / 1000) * ((0.3/1.3) * fuel_price * fuel_consumption / 100))
+                    delta_tax = np.abs(simul_agg_tax - agg_tax_input)
+                    return np.array([delta_population, delta_tax], dtype='float64')
+            
+                R_0, aggregated_tax = sc.optimize.fsolve(compute_residual, np.array([R_0_without_inertia, aggregated_tax_without_inertia]))        
+                simul_rent, simul_size, simul_density = model2(np.array([BETA, float(R_0), B, kappa]), coeff_land, prix_transport, income - cost_BRT_per_pers + (aggregated_tax / population), INTEREST_RATE, HOUSEHOLD_SIZE, agricultural_rent, housing_supply_t1, 1)
+            
+            housing_t0 = simul_size * simul_density
+            
+            if index == 4:
+                copy_simul_density = copy.deepcopy(simul_density)
+            
+            if option["add_residuals"] == True:
+                simul_rent = simul_rent * np.exp(residuals_for_simulation.rent_residual)
+                simul_size = simul_size * np.exp(residuals_for_simulation.size_residual)
+                simul_density = simul_density * np.exp(residuals_for_simulation.density_residual)
+        
+            
         
         # Save outputs
         save_density[index, :] = simul_density
@@ -525,32 +735,31 @@ for city in results_by_pol.City:
         save_R0[index] = R_0
         save_emissions[index] = compute_emissions(CO2_emissions_car, CO2_EMISSIONS_TRANSIT, simul_density, mode_choice, driving.Distance / 1000, transit.Distance / 1000)
         save_emissions_per_capita[index] = save_emissions[index] / population
-        if (((policy_ct == False)) | ((policy_ct == True) & (index < 5))):
+        if ((policy == 'None') | (policy == "UGB") | (policy == "fuel_efficiency") | (policy == 'BRT') | (policy == 'basic_infra') | ((policy == 'carbon_tax') & (index < 5))| ((policy == 'synergy') & (index < 5))):
             save_avg_utility[index] = compute_avg_utility(income - cost_BRT_per_pers, BETA, save_R0[index])
-            save_total_welfare[index] = compute_total_welfare_all_welfare_increasing(income - cost_BRT_per_pers, prix_transport, simul_rent, simul_size, BETA, simul_density, mode_choice, distance_cbd, WALKING_SPEED, country, path_folder, 2015 + index, region, FUEL_EFFICIENCY_DECREASE, BASELINE_EFFICIENCY_DECREASE, LIFESPAN, imaclim, policy_fe, cobenefits = False)
-            save_total_welfare_with_cobenefits[index] = compute_total_welfare_all_welfare_increasing(income - cost_BRT_per_pers, prix_transport, simul_rent, simul_size, BETA, simul_density, mode_choice, distance_cbd, WALKING_SPEED, country, path_folder, 2015 + index, region, FUEL_EFFICIENCY_DECREASE, BASELINE_EFFICIENCY_DECREASE, LIFESPAN, imaclim, policy_fe, cobenefits = True)
-        elif ((policy_ct == True) & (policy_brt == False)& (index >4)):
+            save_total_welfare[index] = compute_total_welfare(income - cost_BRT_per_pers, prix_transport, simul_rent, simul_size, BETA, simul_density, mode_choice, distance_cbd, WALKING_SPEED, country, path_folder, 2015 + index, region, FUEL_EFFICIENCY_DECREASE, BASELINE_EFFICIENCY_DECREASE, LIFESPAN, imaclim, policy, cobenefits = False)
+            save_total_welfare_with_cobenefits[index] = compute_total_welfare(income - cost_BRT_per_pers, prix_transport, simul_rent, simul_size, BETA, simul_density, mode_choice, distance_cbd, WALKING_SPEED, country, path_folder, 2015 + index, region, FUEL_EFFICIENCY_DECREASE, BASELINE_EFFICIENCY_DECREASE, LIFESPAN, imaclim, policy, cobenefits = True)
+        elif ((policy == 'carbon_tax') & (index > 4)):
             save_tax_per_pers[index] = aggregated_tax / population
             save_avg_utility[index] = compute_avg_utility(income + (aggregated_tax / population), BETA, save_R0[index])
-            save_total_welfare[index] = compute_total_welfare_all_welfare_increasing(income + (aggregated_tax / population), prix_transport, simul_rent, simul_size, BETA, simul_density, mode_choice, distance_cbd, WALKING_SPEED, country, path_folder, 2015 + index, region, FUEL_EFFICIENCY_DECREASE, BASELINE_EFFICIENCY_DECREASE, LIFESPAN, imaclim, policy_fe, cobenefits = False)
-            save_total_welfare_with_cobenefits[index] = compute_total_welfare_all_welfare_increasing(income + (aggregated_tax / population), prix_transport, simul_rent, simul_size, BETA, simul_density, mode_choice, distance_cbd, WALKING_SPEED, country, path_folder, 2015 + index, region, FUEL_EFFICIENCY_DECREASE, BASELINE_EFFICIENCY_DECREASE, LIFESPAN, imaclim, policy_fe, cobenefits = True)
-        elif ((policy_ct == True) & (policy_brt == True)& (index >4)):
-            save_tax_per_pers[index] = aggregated_tax / population
+            save_total_welfare[index] = compute_total_welfare(income + (aggregated_tax / population), prix_transport, simul_rent, simul_size, BETA, simul_density, mode_choice, distance_cbd, WALKING_SPEED, country, path_folder, 2015 + index, region, FUEL_EFFICIENCY_DECREASE, BASELINE_EFFICIENCY_DECREASE, LIFESPAN, imaclim, policy, cobenefits = False)
+            save_total_welfare_with_cobenefits[index] = compute_total_welfare(income + (aggregated_tax / population), prix_transport, simul_rent, simul_size, BETA, simul_density, mode_choice, distance_cbd, WALKING_SPEED, country, path_folder, 2015 + index, region, FUEL_EFFICIENCY_DECREASE, BASELINE_EFFICIENCY_DECREASE, LIFESPAN, imaclim, policy, cobenefits = True)
+        elif ((policy == 'synergy') & (index > 4)): 
             save_avg_utility[index] = compute_avg_utility(income - cost_BRT_per_pers + (aggregated_tax / population), BETA, save_R0[index])
-            save_total_welfare[index] = compute_total_welfare_all_welfare_increasing(income - cost_BRT_per_pers + (aggregated_tax / population), prix_transport, simul_rent, simul_size, BETA, simul_density, mode_choice, distance_cbd, WALKING_SPEED, country, path_folder, 2015 + index, region, FUEL_EFFICIENCY_DECREASE, BASELINE_EFFICIENCY_DECREASE, LIFESPAN, imaclim, policy_fe, cobenefits = False)
-            save_total_welfare_with_cobenefits[index] = compute_total_welfare_all_welfare_increasing(income - cost_BRT_per_pers + (aggregated_tax / population), prix_transport, simul_rent, simul_size, BETA, simul_density, mode_choice, distance_cbd, WALKING_SPEED, country, path_folder, 2015 + index, region, FUEL_EFFICIENCY_DECREASE, BASELINE_EFFICIENCY_DECREASE, LIFESPAN, imaclim, policy_fe, cobenefits = True)
+            save_total_welfare[index] = compute_total_welfare(income - cost_BRT_per_pers + (aggregated_tax / population), prix_transport, simul_rent, simul_size, BETA, simul_density, mode_choice, distance_cbd, WALKING_SPEED, country, path_folder, 2015 + index, region, FUEL_EFFICIENCY_DECREASE, BASELINE_EFFICIENCY_DECREASE, LIFESPAN, imaclim, policy, cobenefits = False)
+            save_total_welfare_with_cobenefits[index] = compute_total_welfare(income - cost_BRT_per_pers + (aggregated_tax / population), prix_transport, simul_rent, simul_size, BETA, simul_density, mode_choice, distance_cbd, WALKING_SPEED, country, path_folder, 2015 + index, region, FUEL_EFFICIENCY_DECREASE, BASELINE_EFFICIENCY_DECREASE, LIFESPAN, imaclim, policy, cobenefits = True)
         save_urbanized_area[index] = np.nansum(predict_urbanized_area(density_to_cover, save_density[index]))
         save_modal_shares[index] = mode_choice
         save_cost_BRT_per_pers[index] = cost_BRT_per_pers
         
         # Compute welfare and health cobenefits
-        welfare, air_pollution, active_modes, noise, car_accidents = compute_total_welfare2_all_welfare_increasing(income, prix_transport, simul_rent, simul_size, BETA, simul_density, mode_choice, distance_cbd, WALKING_SPEED, country, path_folder, 2015 + index, region, FUEL_EFFICIENCY_DECREASE, BASELINE_EFFICIENCY_DECREASE, LIFESPAN, imaclim, policy_fe, cobenefits = True)
+        welfare, air_pollution, active_modes, noise, car_accidents = compute_total_welfare2(income, prix_transport, simul_rent, simul_size, BETA, simul_density, mode_choice, distance_cbd, WALKING_SPEED, country, path_folder, 2015 + index, region, FUEL_EFFICIENCY_DECREASE, BASELINE_EFFICIENCY_DECREASE, LIFESPAN, imaclim, policy, cobenefits = True)
         
-
+        
     ### EXPORT OUTPUTS
     
     # Export plots
-    plot_emissions_and_welfare(save_emissions_per_capita, save_total_welfare, save_total_welfare_with_cobenefits, path_outputs, city)      
+    #plot_emissions_and_welfare(save_emissions_per_capita, save_total_welfare, save_total_welfare_with_cobenefits, path_outputs, city)      
     
     # Save outputs
     save_outputs(save_emissions, save_emissions_per_capita, save_population, save_R0, save_rent, save_dwelling_size, save_density, save_avg_utility, save_total_welfare, save_total_welfare_with_cobenefits, save_income, save_urbanized_area, save_distance, save_modal_shares, path_outputs, city)
@@ -562,4 +771,4 @@ for city in results_by_pol.City:
     np.save(path_outputs + city + "_car_accidents.npy", car_accidents)
     np.save(path_outputs + city + "_cost_BRT_per_pers.npy", save_cost_BRT_per_pers)
     np.save(path_outputs + city + "_save_tax_per_pers.npy", save_tax_per_pers)
-    
+

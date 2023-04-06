@@ -73,14 +73,6 @@ def import_data(list_city, paths_data, city, path_folder):
     land_cover_ESACCI = pd.read_csv(path_data_city + country + '/' + city + 
                            '/Land_Cover/grid_ESACCI_LandCover_2015_' + 
                            str.upper(city) + '_' + proj +'.csv')
-    
-    #data_gdp = pd.read_excel(path_data + 'gdp_capita_ppp.xlsx')
-
-    #income = data_gdp.oecd[data_gdp.city == city].iloc[0]    
-    #if np.isnan(income):
-        #    income = data_gdp.brookings[data_gdp.city == city].iloc[0]
-        #if np.isnan(income):
-            #    income = data_gdp.world_bank[data_gdp.city == city].iloc[0]
             
     conversion_rate = import_conversion_to_ppa(path_folder, country, "2019")
     

@@ -35,16 +35,54 @@ from outputs.outputs import *
 path_data = "C:/Users/charl/OneDrive/Bureau/City_dataStudy/"
 path_folder = "C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Data/"
 path_calibration = "C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/final_results/calibration_20211124/"
-path_BAU = "C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/BAU_20221218/" #BAU_20211124
-path_carbon_tax = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/CT_20221218/' #CT_20220907
-path_fuel_efficiency = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/fuel_efficiency_20221218/' #all_welfare_increasing_20220907
-path_UGB = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/UGB_20221218/' #all_20220907
-path_BRT = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/BRT_20221218/' #BRT_20220907
-path_welfare_increasing = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/all_welfare_increasing_20221218/'
-path_all = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/all_20221218/'
+path_BAU = "C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/BAU_congestion2/" #BAU_20221221
+
+path_CT = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/CT_cong/' #CT_20221221
+path_FE = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/FE_cong/' #FE_20221221
+path_UGB = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/UGB_cong/' #TOD_20221221
+path_BRT = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/BRT_cong/' #BRT_20221221
+
+#path_CT = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/CT_20221221/' #CT_20221221
+#path_FE = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/FE_20221221/' #FE_20221221
+#path_UGB = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/TOD_20221221/' #TOD_20221221
+#path_BRT = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/BRT_20221221/' #BRT_20221221
+
+path_CT_FE_BRT_UGB = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/all_cong/' #all_TOD_20221221
+
+#path_CT_FE = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/CT_FE_20221221/'
+#path_CT_BRT = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/CT_BRT_20221221/'
+#path_CT_UGB = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/CT_UGB_20221221/'
+#path_FE_BRT = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/FE_BRT_20221221/'
+#path_FE_UGB = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/FE_UGB_20221221/'
+#path_BRT_UGB = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/BRT_UGB_20221221/'
+
+#path_CT_FE_BRT = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/CT_FE_BRT_20221221/'
+#path_CT_FE_UGB = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/CT_FE_UGB_20221221/'
+#path_CT_BRT_UGB = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/CT_BRT_UGB_20221221/'
+#path_FE_BRT_UGB = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/FE_BRT_UGB_20221221/'
+
+#path_CT = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/robustness_CT_20230106/'
+#path_FE = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/robustness_FE_20230106/'
+#path_UGB = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/robustness_UGB_20230106/'
+#path_BRT = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/robustness_BRT_20230106/'
+
+#path_CT_FE = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/robustness_CT_FE_20230106/'
+#path_CT_BRT = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/robustness_CT_BRT_20230106/'
+#path_CT_UGB = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/robustness_CT_UGB_20230106/'
+#path_FE_BRT = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/robustness_FE_BRT_20230106/'
+#path_FE_UGB = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/robustness_FE_UGB_20230106/'
+#path_BRT_UGB = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/robustness_BRT_UGB_20230106/'
+
+#path_CT_FE_BRT = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/robustness_CT_FE_BRT_20230106/'
+#path_CT_FE_UGB = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/robustness_CT_FE_UGB_20230106/'
+#path_CT_BRT_UGB = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/robustness_CT_BRT_UGB_20230106/'
+#path_FE_BRT_UGB = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/robustness_FE_BRT_UGB_20230106/'
+
+#path_CT_FE_BRT_UGB = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/robustness_all_20230106/'
+
 
 # Work on the welfare-increasing scenario as well?
-welfare_increasing = True
+welfare_increasing = False
 
 # Import list of cities
 list_city = list_of_cities_and_databases(path_data,'cityDatabase')
@@ -66,7 +104,7 @@ for city in list(np.delete(sample_of_cities.index, 153)):
         
 print("Number of cities excluded because of criterion 1:", sum(sample_of_cities.criterion1 == 0))
 
-sample_of_cities.to_excel("C:/Users/charl/OneDrive/Bureau/sample_cities.xlsx")
+sample_of_cities.loc[sample_of_cities.final_sample == 1].to_excel("C:/Users/charl/OneDrive/Bureau/sample_cities.xlsx")
 
 # Exclusion criterion 2: real estate data consistent with income data
 def weighted_percentile(data, percents, weights=None):
@@ -264,6 +302,9 @@ plt.ylabel("Modal share of private car (Simulations - %)", size = 20)
 plt.plot([0,100],[0,100])
 plt.xlim(0, 100)
 plt.ylim(0, 100)
+for i in np.arange(len(modal_shares_data.index)):
+    plt.annotate(np.array(modal_shares_data.City)[i], (np.array(modal_shares_data["Total_car"])[i], np.array(modal_shares_data.Simul_car)[i] * 100), size = 20)
+
 print(sc.stats.pearsonr(np.array(modal_shares_data["Total_car"].astype(float)[~np.isnan(modal_shares_data["Total_car"].astype(float))]), np.array(100 * modal_shares_data.Simul_car)[~np.isnan(modal_shares_data["Total_car"].astype(float))]))
 print(sum(~np.isnan((modal_shares_data["Total_car"]).astype(float))))
 
@@ -310,6 +351,10 @@ plt.xlabel("Modal share of public transport (Data - %)", size = 20)
 plt.ylabel("Modal share of public transport (Simulations - %)", size = 20)
 plt.xlim(0, 100)
 plt.ylim(0, 100)
+plt.plot([0,100],[0,100])
+for i in np.arange(len(modal_shares_data.index)):
+    plt.annotate(np.array(modal_shares_data.City)[i], (np.array(modal_shares_data["Total_transit"])[i], np.array(modal_shares_data.Simul_transit)[i] * 100), size = 20)
+
 print(sc.stats.pearsonr(np.array(modal_shares_data["Total_transit"].astype(float)[~np.isnan(modal_shares_data["Total_transit"].astype(float))]), np.array(100 * modal_shares_data.Simul_transit)[~np.isnan(modal_shares_data["Total_transit"].astype(float))]))
 print(sum(~np.isnan((modal_shares_data["Total_transit"]).astype(float))))
 
@@ -354,8 +399,11 @@ plt.rcParams.update({'font.size': 20})
 plt.scatter(modal_shares_data["Total_walking"], modal_shares_data.Simul_walking * 100, s = 200)
 plt.xlabel("Modal share of active modes (Data - %)", size = 20)
 plt.ylabel("Modal share of active modes (Simulations - %)", size = 20)
-plt.xlim(0, 100)
-plt.ylim(0, 100)
+plt.xlim(0, 60)
+plt.ylim(0, 14)
+for i in np.arange(len(modal_shares_data.index)):
+    plt.annotate(np.array(modal_shares_data.City)[i], (np.array(modal_shares_data["Total_walking"])[i], np.array(modal_shares_data.Simul_walking)[i] * 100), size = 20)
+
 print(sc.stats.pearsonr(np.array(modal_shares_data["Total_walking"].astype(float)[~np.isnan((modal_shares_data["Total_walking"]).astype(float))]), np.array(100 * modal_shares_data.Simul_walking)[~np.isnan((modal_shares_data["Total_walking"]).astype(float))]))
 print(sum(~np.isnan((modal_shares_data["Total_walking"]).astype(float))))
 
@@ -617,6 +665,10 @@ df = pd.DataFrame(columns = ['City', 'emissions_2035_BAU', 'welfare_with_cobenef
 df.City = df.index
 df["city"] = df.index
 
+array_welfare_increasing = pd.read_excel("C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/robustness_welfare_increasing_policies.xlsx", index_col = 0)
+
+array_welfare_increasing.value_counts()
+
 # Import results for all cities
 for city in df.index:
     df.population_2035[df.City == city] = np.load(path_BAU + city + "_population.npy")[20]
@@ -629,98 +681,100 @@ for city in df.index:
     df.emissions_2035_BRT[df.City == city] = np.load(path_BRT + city + "_emissions.npy")[20]
     df.welfare_with_cobenefits_2035_BRT[df.City == city] = np.load(path_BRT + city + "_total_welfare_with_cobenefits.npy")[20]
     df.welfare_without_cobenefits_2035_BRT[df.City == city] = np.load(path_BRT + city + "_total_welfare.npy")[20]
-    df.emissions_2035_FE[df.City == city] = np.load(path_fuel_efficiency + city + "_emissions.npy")[20]
-    df.welfare_with_cobenefits_2035_FE[df.City == city] = np.load(path_fuel_efficiency + city + "_total_welfare_with_cobenefits.npy")[20]
-    df.welfare_without_cobenefits_2035_FE[df.City == city] = np.load(path_fuel_efficiency + city + "_total_welfare.npy")[20]
-    df.emissions_2035_CT[df.City == city] = np.load(path_carbon_tax + city + "_emissions.npy")[20]
-    df.welfare_with_cobenefits_2035_CT[df.City == city] = np.load(path_carbon_tax + city + "_total_welfare_with_cobenefits.npy")[20]  
-    df.welfare_without_cobenefits_2035_CT[df.City == city] = np.load(path_carbon_tax + city + "_total_welfare.npy")[20]  
-    df.emissions_2035_all[df.City == city] = np.load(path_all + city + "_emissions.npy")[20]
-    df.welfare_with_cobenefits_2035_all[df.City == city] = np.load(path_all + city + "_total_welfare_with_cobenefits.npy")[20]  
-    df.welfare_without_cobenefits_2035_all[df.City == city] = np.load(path_all + city + "_total_welfare.npy")[20]  
-    df.avg_dist_city_center_CT[df.City == city] = np.nansum(np.load(path_carbon_tax + city + "_density.npy")[20] * np.load(path_carbon_tax + city + "_distance.npy")) / np.nansum(np.load(path_carbon_tax + city + "_density.npy")[20])
-    df.modal_share_cars_CT[df.City == city] = 100 * np.nansum(np.load(path_carbon_tax + city + "_density.npy")[20][np.load(path_carbon_tax + city + "_modal_shares.npy")[20] == 0]) / np.nansum(np.load(path_carbon_tax + city + "_density.npy")[20]) 
-    df.avg_dist_city_center_FE[df.City == city] = np.nansum(np.load(path_fuel_efficiency + city + "_density.npy")[20] * np.load(path_fuel_efficiency + city + "_distance.npy")) / np.nansum(np.load(path_fuel_efficiency + city + "_density.npy")[20])
-    df.modal_share_cars_FE[df.City == city] = 100 * np.nansum(np.load(path_fuel_efficiency + city + "_density.npy")[20][np.load(path_fuel_efficiency + city + "_modal_shares.npy")[20] == 0]) / np.nansum(np.load(path_fuel_efficiency + city + "_density.npy")[20])
+    df.emissions_2035_FE[df.City == city] = np.load(path_FE + city + "_emissions.npy")[20]
+    df.welfare_with_cobenefits_2035_FE[df.City == city] = np.load(path_FE + city + "_total_welfare_with_cobenefits.npy")[20]
+    df.welfare_without_cobenefits_2035_FE[df.City == city] = np.load(path_FE + city + "_total_welfare.npy")[20]
+    df.emissions_2035_CT[df.City == city] = np.load(path_CT + city + "_emissions.npy")[20]
+    df.welfare_with_cobenefits_2035_CT[df.City == city] = np.load(path_CT + city + "_total_welfare_with_cobenefits.npy")[20]  
+    df.welfare_without_cobenefits_2035_CT[df.City == city] = np.load(path_CT + city + "_total_welfare.npy")[20]  
+    df.emissions_2035_all[df.City == city] = np.load(path_CT_FE_BRT_UGB + city + "_emissions.npy")[20]
+    df.welfare_with_cobenefits_2035_all[df.City == city] = np.load(path_CT_FE_BRT_UGB + city + "_total_welfare_with_cobenefits.npy")[20]  
+    df.welfare_without_cobenefits_2035_all[df.City == city] = np.load(path_CT_FE_BRT_UGB + city + "_total_welfare.npy")[20]  
+    df.avg_dist_city_center_CT[df.City == city] = np.nansum(np.load(path_CT + city + "_density.npy")[20] * np.load(path_CT + city + "_distance.npy")) / np.nansum(np.load(path_CT + city + "_density.npy")[20])
+    df.modal_share_cars_CT[df.City == city] = 100 * np.nansum(np.load(path_CT + city + "_density.npy")[20][np.load(path_CT + city + "_modal_shares.npy")[20] == 0]) / np.nansum(np.load(path_CT + city + "_density.npy")[20]) 
+    df.avg_dist_city_center_FE[df.City == city] = np.nansum(np.load(path_FE + city + "_density.npy")[20] * np.load(path_FE + city + "_distance.npy")) / np.nansum(np.load(path_FE + city + "_density.npy")[20])
+    df.modal_share_cars_FE[df.City == city] = 100 * np.nansum(np.load(path_FE + city + "_density.npy")[20][np.load(path_FE + city + "_modal_shares.npy")[20] == 0]) / np.nansum(np.load(path_FE + city + "_density.npy")[20])
     df.avg_dist_city_center_BRT[df.City == city] = np.nansum(np.load(path_BRT + city + "_density.npy")[20] * np.load(path_BRT + city + "_distance.npy")) / np.nansum(np.load(path_BRT + city + "_density.npy")[20])
     df.modal_share_cars_BRT[df.City == city] = 100 * np.nansum(np.load(path_BRT + city + "_density.npy")[20][np.load(path_BRT + city + "_modal_shares.npy")[20] == 0]) / np.nansum(np.load(path_BRT + city + "_density.npy")[20])
     df.avg_dist_city_center_UGB[df.City == city] = np.nansum(np.load(path_UGB + city + "_density.npy")[20] * np.load(path_UGB + city + "_distance.npy")) / np.nansum(np.load(path_UGB + city + "_density.npy")[20])
     df.modal_share_cars_UGB[df.City == city] = 100 * np.nansum(np.load(path_UGB + city + "_density.npy")[20][np.load(path_UGB + city + "_modal_shares.npy")[20] == 0]) / np.nansum(np.load(path_UGB + city + "_density.npy")[20])
     df.avg_dist_city_center_BAU[df.City == city] = np.nansum(np.load(path_BAU + city + "_density.npy")[20] * np.load(path_BAU + city + "_distance.npy")) / np.nansum(np.load(path_BAU + city + "_density.npy")[20])
     df.modal_share_cars_BAU[df.City == city] = 100 * np.nansum(np.load(path_BAU + city + "_density.npy")[20][np.load(path_BAU + city + "_modal_shares.npy")[20] == 0]) / np.nansum(np.load(path_BAU + city + "_density.npy")[20])
-    df.avg_dist_city_center_all[df.City == city] = np.nansum(np.load(path_all + city + "_density.npy")[20] * np.load(path_all + city + "_distance.npy")) / np.nansum(np.load(path_all + city + "_density.npy")[20])
-    df.modal_share_cars_all[df.City == city] = 100 * np.nansum(np.load(path_all + city + "_density.npy")[20][np.load(path_all + city + "_modal_shares.npy")[20] == 0]) / np.nansum(np.load(path_all + city + "_density.npy")[20])
+    df.avg_dist_city_center_all[df.City == city] = np.nansum(np.load(path_CT_FE_BRT_UGB + city + "_density.npy")[20] * np.load(path_CT_FE_BRT_UGB + city + "_distance.npy")) / np.nansum(np.load(path_CT_FE_BRT_UGB + city + "_density.npy")[20])
+    df.modal_share_cars_all[df.City == city] = 100 * np.nansum(np.load(path_CT_FE_BRT_UGB + city + "_density.npy")[20][np.load(path_CT_FE_BRT_UGB + city + "_modal_shares.npy")[20] == 0]) / np.nansum(np.load(path_CT_FE_BRT_UGB + city + "_density.npy")[20])
     df.modal_share_pt_0[df.City == city] = 100 * np.nansum(np.load(path_BAU + city + "_density.npy")[0][np.load(path_BAU + city + "_modal_shares.npy")[0] == 1]) / np.nansum(np.load(path_BAU + city + "_density.npy")[0])
     df.modal_share_cars_0[df.City == city] = 100 * np.nansum(np.load(path_BAU + city + "_density.npy")[0][np.load(path_BAU + city + "_modal_shares.npy")[0] == 0]) / np.nansum(np.load(path_BAU + city + "_density.npy")[0])
     df.housing_2035_BAU[df.City == city] = np.average(np.load(path_BAU + city + "_dwelling_size.npy")[20], weights = np.load(path_BAU + city + "_density.npy")[20])
-    df.housing_2035_CT[df.City == city] = np.average(np.load(path_carbon_tax + city + "_dwelling_size.npy")[20], weights = np.load(path_carbon_tax + city + "_density.npy")[20])
-    df.housing_2035_FE[df.City == city] = np.average(np.load(path_fuel_efficiency + city + "_dwelling_size.npy")[20], weights = np.load(path_fuel_efficiency + city + "_density.npy")[20])
+    df.housing_2035_CT[df.City == city] = np.average(np.load(path_CT + city + "_dwelling_size.npy")[20], weights = np.load(path_CT + city + "_density.npy")[20])
+    df.housing_2035_FE[df.City == city] = np.average(np.load(path_FE + city + "_dwelling_size.npy")[20], weights = np.load(path_FE + city + "_density.npy")[20])
     df.housing_2035_BRT[df.City == city] = np.average(np.load(path_BRT + city + "_dwelling_size.npy")[20], weights = np.load(path_BRT + city + "_density.npy")[20])
     df.housing_2035_UGB[df.City == city] = np.average(np.load(path_UGB + city + "_dwelling_size.npy")[20], weights = np.load(path_UGB + city + "_density.npy")[20])
-    df.housing_2035_all[df.City == city] = np.average(np.load(path_all + city + "_dwelling_size.npy")[20], weights = np.load(path_all + city + "_density.npy")[20])
+    df.housing_2035_all[df.City == city] = np.average(np.load(path_CT_FE_BRT_UGB + city + "_dwelling_size.npy")[20], weights = np.load(path_CT_FE_BRT_UGB + city + "_density.npy")[20])
     df.rent_2035_BAU[df.City == city] = np.average(np.load(path_BAU + city + "_rent.npy")[20], weights = np.load(path_BAU + city + "_density.npy")[20])
-    df.rent_2035_CT[df.City == city] = np.average(np.load(path_carbon_tax + city + "_rent.npy")[20], weights = np.load(path_carbon_tax + city + "_density.npy")[20])
-    df.rent_2035_FE[df.City == city] = np.average(np.load(path_fuel_efficiency + city + "_rent.npy")[20], weights = np.load(path_fuel_efficiency + city + "_density.npy")[20])
+    df.rent_2035_CT[df.City == city] = np.average(np.load(path_CT + city + "_rent.npy")[20], weights = np.load(path_CT + city + "_density.npy")[20])
+    df.rent_2035_FE[df.City == city] = np.average(np.load(path_FE + city + "_rent.npy")[20], weights = np.load(path_FE + city + "_density.npy")[20])
     df.rent_2035_BRT[df.City == city] = np.average(np.load(path_BRT + city + "_rent.npy")[20], weights = np.load(path_BRT + city + "_density.npy")[20])
     df.rent_2035_UGB[df.City == city] = np.average(np.load(path_UGB + city + "_rent.npy")[20], weights = np.load(path_UGB + city + "_density.npy")[20])
-    df.rent_2035_all[df.City == city] = np.average(np.load(path_all + city + "_rent.npy")[20], weights = np.load(path_all + city + "_density.npy")[20])
+    df.rent_2035_all[df.City == city] = np.average(np.load(path_CT_FE_BRT_UGB + city + "_rent.npy")[20], weights = np.load(path_CT_FE_BRT_UGB + city + "_density.npy")[20])
     tcost_BAU = np.load(path_BAU + city + "_prix_transport.npy")
-    tcost_CT = np.load(path_carbon_tax + city + "_prix_transport.npy")
-    tcost_FE =np.load(path_fuel_efficiency + city + "_prix_transport.npy")
+    tcost_CT = np.load(path_CT + city + "_prix_transport.npy")
+    tcost_FE =np.load(path_FE + city + "_prix_transport.npy")
     tcost_BRT =np.load(path_BRT + city + "_prix_transport.npy")
     tcost_UGB = np.load(path_UGB + city + "_prix_transport.npy")
-    tcost_all = np.load(path_all + city + "_prix_transport.npy")
+    tcost_all = np.load(path_CT_FE_BRT_UGB + city + "_prix_transport.npy")
     df.tcost_2035_BAU[df.City == city] = np.average(tcost_BAU[~np.isnan(tcost_BAU)], weights = np.load(path_BAU + city + "_density.npy")[20][~np.isnan(tcost_BAU)])
-    df.tcost_2035_CT[df.City == city] = np.average(tcost_CT[~np.isnan(tcost_CT)], weights = np.load(path_carbon_tax + city + "_density.npy")[20][~np.isnan(tcost_CT)])
-    df.tcost_2035_FE[df.City == city] = np.average(tcost_FE[~np.isnan(tcost_FE)], weights = np.load(path_fuel_efficiency + city + "_density.npy")[20][~np.isnan(tcost_FE)])
+    df.tcost_2035_CT[df.City == city] = np.average(tcost_CT[~np.isnan(tcost_CT)], weights = np.load(path_CT + city + "_density.npy")[20][~np.isnan(tcost_CT)])
+    df.tcost_2035_FE[df.City == city] = np.average(tcost_FE[~np.isnan(tcost_FE)], weights = np.load(path_FE + city + "_density.npy")[20][~np.isnan(tcost_FE)])
     df.tcost_2035_BRT[df.City == city] = np.average(tcost_BRT[~np.isnan(tcost_BRT)], weights = np.load(path_BRT + city + "_density.npy")[20][~np.isnan(tcost_BRT)])
     df.tcost_2035_UGB[df.City == city] = np.average(tcost_UGB[~np.isnan(tcost_UGB)], weights = np.load(path_UGB + city + "_density.npy")[20][~np.isnan(tcost_UGB)])
-    df.tcost_2035_all[df.City == city] = np.average(tcost_all[~np.isnan(tcost_all)], weights = np.load(path_all + city + "_density.npy")[20][~np.isnan(tcost_all)])
+    df.tcost_2035_all[df.City == city] = np.average(tcost_all[~np.isnan(tcost_all)], weights = np.load(path_CT_FE_BRT_UGB + city + "_density.npy")[20][~np.isnan(tcost_all)])
     df.active_modes_2035_BAU[df.City == city] = float(np.load(path_BAU + city + "_active_modes.npy"))
-    df.active_modes_2035_CT[df.City == city] = float(np.load(path_carbon_tax + city + "_active_modes.npy"))
-    df.active_modes_2035_FE[df.City == city] = float(np.load(path_fuel_efficiency + city + "_active_modes.npy"))
+    df.active_modes_2035_CT[df.City == city] = float(np.load(path_CT + city + "_active_modes.npy"))
+    df.active_modes_2035_FE[df.City == city] = float(np.load(path_FE + city + "_active_modes.npy"))
     df.active_modes_2035_UGB[df.City == city] = float(np.load(path_UGB + city + "_active_modes.npy"))
     df.active_modes_2035_BRT[df.City == city] = float(np.load(path_BRT + city + "_active_modes.npy"))
-    df.active_modes_2035_all[df.City == city] = float(np.load(path_all + city + "_active_modes.npy"))
+    df.active_modes_2035_all[df.City == city] = float(np.load(path_CT_FE_BRT_UGB + city + "_active_modes.npy"))
     df.air_pollution_2035_BAU[df.City == city] = float(np.load(path_BAU + city + "_air_pollution.npy"))
-    df.air_pollution_2035_CT[df.City == city] = float(np.load(path_carbon_tax + city + "_air_pollution.npy"))
-    df.air_pollution_2035_FE[df.City == city] = float(np.load(path_fuel_efficiency + city + "_air_pollution.npy"))
+    df.air_pollution_2035_CT[df.City == city] = float(np.load(path_CT + city + "_air_pollution.npy"))
+    df.air_pollution_2035_FE[df.City == city] = float(np.load(path_FE + city + "_air_pollution.npy"))
     df.air_pollution_2035_UGB[df.City == city] = float(np.load(path_UGB + city + "_air_pollution.npy"))
     df.air_pollution_2035_BRT[df.City == city] = float(np.load(path_BRT + city + "_air_pollution.npy"))
-    df.air_pollution_2035_all[df.City == city] = float(np.load(path_all + city + "_air_pollution.npy"))
+    df.air_pollution_2035_all[df.City == city] = float(np.load(path_CT_FE_BRT_UGB + city + "_air_pollution.npy"))
     df.car_accidents_2035_BAU[df.City == city] = float(np.load(path_BAU + city + "_car_accidents.npy"))
-    df.car_accidents_2035_CT[df.City == city] = float(np.load(path_carbon_tax + city + "_car_accidents.npy"))
-    df.car_accidents_2035_FE[df.City == city] = float(np.load(path_fuel_efficiency + city + "_car_accidents.npy"))
+    df.car_accidents_2035_CT[df.City == city] = float(np.load(path_CT + city + "_car_accidents.npy"))
+    df.car_accidents_2035_FE[df.City == city] = float(np.load(path_FE + city + "_car_accidents.npy"))
     df.car_accidents_2035_UGB[df.City == city] = float(np.load(path_UGB + city + "_car_accidents.npy"))
     df.car_accidents_2035_BRT[df.City == city] = float(np.load(path_BRT + city + "_car_accidents.npy"))
-    df.car_accidents_2035_all[df.City == city] = float(np.load(path_all + city + "_car_accidents.npy"))
+    df.car_accidents_2035_all[df.City == city] = float(np.load(path_CT_FE_BRT_UGB + city + "_car_accidents.npy"))
     df.noise_2035_BAU[df.City == city] = float(np.load(path_BAU + city + "_noise.npy"))
-    df.noise_2035_CT[df.City == city] = float(np.load(path_carbon_tax + city + "_noise.npy"))
-    df.noise_2035_FE[df.City == city] = float(np.load(path_fuel_efficiency + city + "_noise.npy"))
+    df.noise_2035_CT[df.City == city] = float(np.load(path_CT + city + "_noise.npy"))
+    df.noise_2035_FE[df.City == city] = float(np.load(path_FE + city + "_noise.npy"))
     df.noise_2035_UGB[df.City == city] = float(np.load(path_UGB + city + "_noise.npy"))
     df.noise_2035_BRT[df.City == city] = float(np.load(path_BRT + city + "_noise.npy"))
-    df.noise_2035_all[df.City == city] = float(np.load(path_all + city + "_noise.npy"))
+    df.noise_2035_all[df.City == city] = float(np.load(path_CT_FE_BRT_UGB + city + "_noise.npy"))
     df.income_2035[df.City == city] = float(np.load(path_BAU + city + "_income.npy")[20])
-    df.tax_2035_CT[df.City == city] = float(np.load(path_carbon_tax + city + "_save_tax_per_pers.npy")[20])
-    df.tax_2035_all[df.City == city] = float(np.load(path_all + city + "_save_tax_per_pers.npy")[20])
+    df.tax_2035_CT[df.City == city] = float(np.load(path_CT + city + "_save_tax_per_pers.npy")[20])
+    df.tax_2035_all[df.City == city] = float(np.load(path_CT_FE_BRT_UGB + city + "_save_tax_per_pers.npy")[20])
     df.cost_2035_BRT[df.City == city] = float(np.load(path_BRT + city + "_cost_BRT_per_pers.npy")[20])
-    df.cost_2035_all[df.City == city] = float(np.load(path_all + city + "_cost_BRT_per_pers.npy")[20])
+    df.cost_2035_all[df.City == city] = float(np.load(path_CT_FE_BRT_UGB + city + "_cost_BRT_per_pers.npy")[20])
     if welfare_increasing == True:
-        df.tax_2035_all_welfare_increasing[df.City == city] = float(np.load(path_welfare_increasing + city + "_save_tax_per_pers.npy")[20])
-        df.cost_2035_all_welfare_increasing[df.City == city] = float(np.load(path_welfare_increasing + city + "_cost_BRT_per_pers.npy")[20])
-        df.emissions_2035_all_welfare_increasing[df.City == city] = np.load(path_welfare_increasing + city + "_emissions.npy")[20]
-        df.welfare_with_cobenefits_2035_all_welfare_increasing[df.City == city] = np.load(path_welfare_increasing + city + "_total_welfare_with_cobenefits.npy")[20]  
-        df.welfare_without_cobenefits_2035_all_welfare_increasing[df.City == city] = np.load(path_welfare_increasing + city + "_total_welfare.npy")[20]  
-        df.avg_dist_city_center_all_welfare_increasing[df.City == city] = np.nansum(np.load(path_welfare_increasing + city + "_density.npy")[20] * np.load(path_welfare_increasing + city + "_distance.npy")) / np.nansum(np.load(path_welfare_increasing + city + "_density.npy")[20])
-        df.modal_share_cars_all_welfare_increasing[df.City == city] = 100 * np.nansum(np.load(path_welfare_increasing + city + "_density.npy")[20][np.load(path_welfare_increasing + city + "_modal_shares.npy")[20] == 0]) / np.nansum(np.load(path_welfare_increasing + city + "_density.npy")[20]) 
-        df.housing_2035_all_welfare_increasing[df.City == city] = np.average(np.load(path_welfare_increasing + city + "_dwelling_size.npy")[20], weights = np.load(path_welfare_increasing + city + "_density.npy")[20])
-        df.rent_2035_all_welfare_increasing[df.City == city] = np.average(np.load(path_welfare_increasing + city + "_rent.npy")[20], weights = np.load(path_welfare_increasing + city + "_density.npy")[20])
-        tcost_all_welfare_increasing = np.load(path_welfare_increasing + city + "_prix_transport.npy")
-        df.tcost_2035_all_welfare_increasing[df.City == city] = np.average(tcost_all_welfare_increasing[~np.isnan(tcost_all_welfare_increasing)], weights = np.load(path_welfare_increasing + city + "_density.npy")[20][~np.isnan(tcost_all_welfare_increasing)])
-        df.active_modes_2035_all_welfare_increasing[df.City == city] = float(np.load(path_welfare_increasing + city + "_active_modes.npy"))
-        df.air_pollution_2035_all_welfare_increasing[df.City == city] = float(np.load(path_welfare_increasing + city + "_air_pollution.npy"))
-        df.car_accidents_2035_all_welfare_increasing[df.City == city] = float(np.load(path_welfare_increasing + city + "_car_accidents.npy"))
-        df.noise_2035_all_welfare_increasing[df.City == city] = float(np.load(path_welfare_increasing + city + "_noise.npy"))
+        path_welfare_increasing = 'path_' + str(array_welfare_increasing.loc[city].squeeze())
+        print(path_welfare_increasing)
+        df.tax_2035_all_welfare_increasing[df.City == city] = float(np.load(vars()[path_welfare_increasing] + city + "_save_tax_per_pers.npy")[20])
+        df.cost_2035_all_welfare_increasing[df.City == city] = float(np.load(vars()[path_welfare_increasing] + city + "_cost_BRT_per_pers.npy")[20])
+        df.emissions_2035_all_welfare_increasing[df.City == city] = np.load(vars()[path_welfare_increasing] + city + "_emissions.npy")[20]
+        df.welfare_with_cobenefits_2035_all_welfare_increasing[df.City == city] = np.load(vars()[path_welfare_increasing] + city + "_total_welfare_with_cobenefits.npy")[20]  
+        df.welfare_without_cobenefits_2035_all_welfare_increasing[df.City == city] = np.load(vars()[path_welfare_increasing] + city + "_total_welfare.npy")[20]  
+        df.avg_dist_city_center_all_welfare_increasing[df.City == city] = np.nansum(np.load(vars()[path_welfare_increasing] + city + "_density.npy")[20] * np.load(vars()[path_welfare_increasing] + city + "_distance.npy")) / np.nansum(np.load(vars()[path_welfare_increasing] + city + "_density.npy")[20])
+        df.modal_share_cars_all_welfare_increasing[df.City == city] = 100 * np.nansum(np.load(vars()[path_welfare_increasing] + city + "_density.npy")[20][np.load(vars()[path_welfare_increasing] + city + "_modal_shares.npy")[20] == 0]) / np.nansum(np.load(vars()[path_welfare_increasing] + city + "_density.npy")[20]) 
+        df.housing_2035_all_welfare_increasing[df.City == city] = np.average(np.load(vars()[path_welfare_increasing] + city + "_dwelling_size.npy")[20], weights = np.load(vars()[path_welfare_increasing] + city + "_density.npy")[20])
+        df.rent_2035_all_welfare_increasing[df.City == city] = np.average(np.load(vars()[path_welfare_increasing] + city + "_rent.npy")[20], weights = np.load(vars()[path_welfare_increasing] + city + "_density.npy")[20])
+        tcost_all_welfare_increasing = np.load(vars()[path_welfare_increasing] + city + "_prix_transport.npy")
+        df.tcost_2035_all_welfare_increasing[df.City == city] = np.average(tcost_all_welfare_increasing[~np.isnan(tcost_all_welfare_increasing)], weights = np.load(vars()[path_welfare_increasing] + city + "_density.npy")[20][~np.isnan(tcost_all_welfare_increasing)])
+        df.active_modes_2035_all_welfare_increasing[df.City == city] = float(np.load(vars()[path_welfare_increasing] + city + "_active_modes.npy"))
+        df.air_pollution_2035_all_welfare_increasing[df.City == city] = float(np.load(vars()[path_welfare_increasing] + city + "_air_pollution.npy"))
+        df.car_accidents_2035_all_welfare_increasing[df.City == city] = float(np.load(vars()[path_welfare_increasing] + city + "_car_accidents.npy"))
+        df.noise_2035_all_welfare_increasing[df.City == city] = float(np.load(vars()[path_welfare_increasing] + city + "_noise.npy"))
 
         
 df.iloc[:,1:102] = df.iloc[:,1:102].astype(float)
@@ -818,7 +872,8 @@ if welfare_increasing == True:
     df["var_noise_all_welfare_increasing"] = 100 * (df.noise_2035_all_welfare_increasing - df.noise_2035_BAU) / df.noise_2035_BAU
 
     
-#df.to_excel('C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/results_20221218.xlsx')
+#df.to_excel('C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/robustness_20230106.xlsx')
+df.to_excel('C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/test_cong.xlsx')
 
 df["Population"] = np.nan
 for city in df.City:
@@ -941,9 +996,16 @@ if welfare_increasing == True:
     data['Average emissions'] = [np.nansum(df.emissions_2035_CT_var * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.emissions_2035_BRT_var * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.emissions_2035_FE_var * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.emissions_2035_UGB_var * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.emissions_2035_all_var * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.emissions_2035_all_welfare_increasing_var * df.population_2035) / np.nansum(df.population_2035)]
     data['Average welfare'] = [np.nansum(df.welfare_2035_CT_var * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.welfare_2035_BRT_var * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.welfare_2035_FE_var * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.welfare_2035_UGB_var * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.welfare_2035_all_var * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.welfare_2035_all_welfare_increasing_var * df.population_2035) / np.nansum(df.population_2035)]
     data['Average welfare without cobenefits'] = [np.nansum(df.welfare_2035_CT_var_without * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.welfare_2035_BRT_var_without * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.welfare_2035_FE_var_without * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.welfare_2035_UGB_var_without * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.welfare_2035_all_var_without * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.welfare_2035_all_welfare_increasing_var_without * df.population_2035) / np.nansum(df.population_2035)]
-
+else:
+    data = pd.DataFrame(columns = ['policy', 'Average emissions'])
+    data['policy'] = ["Fuel tax", "BRT", "Fuel efficiency", "UGB", "all"]
+    data['Average emissions'] = [np.nansum(df.emissions_2035_CT_var * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.emissions_2035_BRT_var * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.emissions_2035_FE_var * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.emissions_2035_UGB_var * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.emissions_2035_all_var * df.population_2035) / np.nansum(df.population_2035)]
+    data['Average welfare'] = [np.nansum(df.welfare_2035_CT_var * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.welfare_2035_BRT_var * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.welfare_2035_FE_var * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.welfare_2035_UGB_var * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.welfare_2035_all_var * df.population_2035) / np.nansum(df.population_2035)]
+    data['Average welfare without cobenefits'] = [np.nansum(df.welfare_2035_CT_var_without * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.welfare_2035_BRT_var_without * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.welfare_2035_FE_var_without * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.welfare_2035_UGB_var_without * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.welfare_2035_all_var_without * df.population_2035) / np.nansum(df.population_2035)]
+    
 tidy = data.melt(id_vars='policy').rename(columns=str.title)
-tidy = tidy[0:12]
+#tidy = tidy[0:12]
+tidy = tidy[0:10]
 plt.rcParams['figure.dpi'] = 360
 sns.set(style="whitegrid")
 fig, ax = plt.subplots(figsize=(12,4))
@@ -951,7 +1013,7 @@ sns.barplot(data=tidy, x="Policy", y="Value", hue = "Variable", palette=['#fc8d6
 plt.xlabel('')
 plt.ylabel('')
 plt.yticks([], [])
-plt.xticks(ticks = np.arange(6), labels = ["Fuel Tax", "Bus Rapid Transit", "Fuel Efficiency", "Urban Growth Boundary", "All", "All welfare-increasing"])
+plt.xticks(ticks = np.arange(5), labels = ["Fuel Tax", "Bus Rapid Transit", "Fuel Efficiency", "Urban Growth Boundary", "All"])#, "All welfare-increasing"])
 handles, labels = ax.get_legend_handles_labels()
 ax.legend(handles=handles[0:], labels=["Total transport emissions", "Average welfare"], title = '', bbox_to_anchor=(0.65, 0.3), fontsize = 14, title_fontsize=14, loc=2, borderaxespad=0.)._legend_box.align = "left"
 ax.tick_params(axis = 'both', labelsize=14, color='#4f4e4e')
@@ -963,31 +1025,31 @@ plt.text(x=1.2, y=0.6, s='+' +str(round(data["Average welfare"][1], 1))+ "%",
 plt.text(x=2.2, y=0.6, s='+' +str(round(data["Average welfare"][2], 1))+ "%", 
                  color='black', fontsize=14, horizontalalignment='center')
 plt.text(x=3.2, y=-1, s=str(round(data["Average welfare"][3], 1))+ "%", 
-                 color='white', fontsize=14, horizontalalignment='center')
+                 color='black', fontsize=14, horizontalalignment='center')
 plt.text(x=4.2, y=-1, s=str(round(data["Average welfare"][4], 1))+ "%", 
                  color='black', fontsize=14, horizontalalignment='center')
-plt.text(x=5.2, y=-1, s=str(round(data["Average welfare"][5], 1))+ "%", 
-                 color='black', fontsize=14, horizontalalignment='center')
+#plt.text(x=5.2, y=-1, s=str(round(data["Average welfare"][5], 1))+ "%", 
+#                          color='black', fontsize=14, horizontalalignment='center')
 plt.text(x=-0.2, y=-1, s=str(round(data["Average emissions"][0], 1))+ "%", 
-                 color='white', fontsize=14, horizontalalignment='center')
+                 color='black', fontsize=14, horizontalalignment='center')
 plt.text(x=0.8, y=-1, s=str(round(data["Average emissions"][1], 1))+ "%", 
-                 color='white', fontsize=14, horizontalalignment='center')
+                 color='black', fontsize=14, horizontalalignment='center')
 plt.text(x=1.8, y=-1, s=str(round(data["Average emissions"][2], 1))+ "%", 
-                 color='white', fontsize=14, horizontalalignment='center')
+                 color='black', fontsize=14, horizontalalignment='center')
 plt.text(x=2.8, y=-1, s=str(round(data["Average emissions"][3], 1))+ "%", 
-                 color='white', fontsize=14, horizontalalignment='center')
+                 color='black', fontsize=14, horizontalalignment='center')
 plt.text(x=3.8, y=-1, s=str(round(data["Average emissions"][4], 1))+ "%", 
-                 color='white', fontsize=14, horizontalalignment='center')
-plt.text(x=4.8, y=-1, s=str(round(data["Average emissions"][5], 1))+ "%", 
-                 color='white', fontsize=14, horizontalalignment='center')
+                 color='black', fontsize=14, horizontalalignment='center')
+#plt.text(x=4.8, y=-1, s=str(round(data["Average emissions"][5], 1))+ "%", 
+#                 color='black', fontsize=14, horizontalalignment='center')
 #plt.savefig('aggregated.png')
 
 
 # Regressions: emissions/welfare variations on city characteristics
 city_characteristics2 = pd.read_excel("C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/city_characteristics_20211027.xlsx")
 city_characteristics = pd.read_excel("C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/city_characteristics_20210810.xlsx")
-df = df.merge(city_characteristics, left_on = "City", right_on = 'city')
-df = df.merge(city_characteristics2.loc[:, ["city", "agricultural_rent"]], on = "city")
+df = df.merge(city_characteristics, on = 'city')
+df = df.merge(city_characteristics2.loc[:, ["city", "agricultural_rent"]], on = 'city')
 compute_density = pd.read_excel("C:/Users/charl/OneDrive/Bureau/Urban sprawl/Urban sprawl and density/scenarios_densities_20211115.xlsx")
 compute_density["data_density_2015"] = 0.01 * compute_density.data_pop_2015 / compute_density.ESA_land_cover_2015
 df = df.merge(compute_density, on = 'City')
@@ -1113,13 +1175,14 @@ df["Oceania"] = fixed_effects.Oceania
 df["South_America"] = fixed_effects.South_America
 df["Europe"]= fixed_effects.Europe
 
-s = "log_population + log_income + log_agri_rent + substitution_potential + log_pop_growth + log_inc_growth + r2_density"
+s = "log_population + log_income + log_agri_rent + substitution_potential + log_pop_growth + log_inc_growth + urba + r2_density"
 s_brt = s + "+ network_pop+ network_pop2"
 
 df["emissions_2035_CT_var"] = df["emissions_2035_CT_var"].astype(float)
 df["emissions_2035_FE_var"] = df["emissions_2035_FE_var"].astype(float)
 df["emissions_2035_UGB_var"] = df["emissions_2035_UGB_var"].astype(float)
 df["emissions_2035_BRT_var"] = df["emissions_2035_BRT_var"].astype(float)
+
 
 reg1 = ols("emissions_2035_CT_var ~ " + s, data=df).fit(cov_type='HC3')
 reg1.summary()
@@ -1150,17 +1213,36 @@ reg3.summary()
 reg4 = ols("welfare_2035_BRT_var ~ " + s_brt, data=df).fit(cov_type='HC2')
 reg4.summary()
 
+df["cost_effectiveness_with_cobenefits_CT"] =  (df.welfare_with_cobenefits_2035_CT / df.welfare_with_cobenefits_2035_BAU) / (df.emissions_2035_CT / df.emissions_2035_BAU)
+df["cost_effectiveness_with_cobenefits_FE"] = (df.welfare_with_cobenefits_2035_FE / df.welfare_with_cobenefits_2035_BAU) / (df.emissions_2035_FE / df.emissions_2035_BAU)
+df["cost_effectiveness_with_cobenefits_UGB"] = (df.welfare_with_cobenefits_2035_UGB / df.welfare_with_cobenefits_2035_BAU) / (df.emissions_2035_UGB / df.emissions_2035_BAU)
+df["cost_effectiveness_with_cobenefits_BRT"] = (df.welfare_with_cobenefits_2035_BRT / df.welfare_with_cobenefits_2035_BAU) / (df.emissions_2035_BRT / df.emissions_2035_BAU) 
+
+reg1 = ols("cost_effectiveness_with_cobenefits_CT ~ " + s, data=df).fit(cov_type='HC3')
+reg1.summary()
+
+reg2 = ols("cost_effectiveness_with_cobenefits_FE ~ " + s, data=df).fit(cov_type='HC3')
+reg2.summary()
+
+reg3 = ols("cost_effectiveness_with_cobenefits_UGB ~ " + s, data=df).fit(cov_type='HC3')
+reg3.summary()
+
+reg4 = ols("cost_effectiveness_with_cobenefits_BRT ~ " + s_brt, data=df).fit(cov_type='HC2')
+reg4.summary()
+
+
+
 #PCA Analysis
 features = ['log_population', 'log_income', 'substitution_potential', 'log_pop_growth', 'log_inc_growth', 'log_density']
 x = df.loc[:, features].values
-y = df.loc[:,['cost_effectiveness_with_cobenefits_BRT', 'cost_effectiveness_with_cobenefits_UGB', 'cost_effectiveness_with_cobenefits_FE', 'cost_effectiveness_with_cobenefits_CT']].values
+#y = df.loc[:,['cost_effectiveness_with_cobenefits_BRT', 'cost_effectiveness_with_cobenefits_UGB', 'cost_effectiveness_with_cobenefits_FE', 'cost_effectiveness_with_cobenefits_CT']].values
 x = StandardScaler().fit_transform(x)
 pca = PCA(n_components=4)
 principalComponents = pca.fit_transform(x)
 principalDf = pd.DataFrame(data = principalComponents
              , columns = ['principal_component_1', 'principal_component_2', 'principal_component_3', 'principal_component_4'])
 
-finalDf = pd.concat([principalDf, df[['cost_effectiveness_with_cobenefits_BRT', 'cost_effectiveness_with_cobenefits_UGB', 'cost_effectiveness_with_cobenefits_FE', 'cost_effectiveness_with_cobenefits_CT',"welfare_2035_CT_var","welfare_2035_FE_var","welfare_2035_UGB_var","welfare_2035_BRT_var","emissions_2035_CT_var","emissions_2035_FE_var","emissions_2035_UGB_var","emissions_2035_BRT_var", "City", "r2_density", 'network_pop', 'network_pop2']]], axis = 1)
+finalDf = pd.concat([principalDf, df[["cost_effectiveness_with_cobenefits_CT","cost_effectiveness_with_cobenefits_FE", "cost_effectiveness_with_cobenefits_BRT", "cost_effectiveness_with_cobenefits_UGB", "welfare_2035_CT_var","welfare_2035_FE_var","welfare_2035_UGB_var","welfare_2035_BRT_var","emissions_2035_CT_var","emissions_2035_FE_var","emissions_2035_UGB_var","emissions_2035_BRT_var", "City", "r2_density", 'network_pop', 'network_pop2']]], axis = 1)
 print(pca.explained_variance_ratio_)
 print(pca.components_)
 
@@ -1202,6 +1284,18 @@ reg1 = ols("emissions_2035_UGB_var ~ " + s + '+ r2_density', data=finalDf).fit(c
 reg1.summary()
 
 reg1 = ols("emissions_2035_BRT_var ~ " + s + '+ r2_density + network_pop + network_pop2', data=finalDf).fit(cov_type='HC3')
+reg1.summary()
+
+reg1 = ols("cost_effectiveness_with_cobenefits_CT ~ " + s + '+ r2_density', data=finalDf).fit(cov_type='HC3')
+reg1.summary()
+
+reg1 = ols("cost_effectiveness_with_cobenefits_FE ~ " + s + '+ r2_density', data=finalDf).fit(cov_type='HC3')
+reg1.summary()
+
+reg1 = ols("cost_effectiveness_with_cobenefits_BRT ~ " + s + '+ r2_density+ network_pop + network_pop2', data=finalDf).fit(cov_type='HC3')
+reg1.summary()
+
+reg1 = ols("cost_effectiveness_with_cobenefits_UGB ~ " + s + '+ r2_density', data=finalDf).fit(cov_type='HC3')
 reg1.summary()
 
 #Impact of policies on the distance to the city center and on modal shares
