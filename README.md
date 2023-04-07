@@ -3,7 +3,15 @@
 
 This code allows to calibrate a model derived from the standard urban model of urban economics on 120 cities worldwide, and to simulate the impact of 4 transport emissions mitigation policies as well as of policy portfolios on these cities.
 
-main.py allows for model calibration and policies simulations, and main_policy_portfolios.py allows for model calibration and policy portfolios simulations. robustness/main_congestion.py, robustness/main_policy_portfolios_congestion.py and main_policy_portfolios_robustness.py allow for robustness checks.
+*main.py* allows for model calibration and policies simulations, and *main_policy_portfolios.py* allows for model calibration and policy portfolios simulations.
+
+*robustness/main_congestion.py*, *robustness/main_policy_portfolios_congestion.py* and *main_policy_portfolios_robustness.py* allow for robustness checks.
+
+*results_analysis/welfare_increasing_portfolio.py* allows to reproduce tables S13 and S15.
+
+*results_analysis/results_analysis.py* allows to reproduce tables S1, S2, S3, S4, S7, S8, S9, S10, S11, S12 and figures S6, S10.
+
+*results_analysis/rcharts.R* allows to reproduce figures 1, 2, 3, S11, S12, S13, S14, S15, S16, S17, S18, S19, S20, S21, S22, S23, S24, S25, S26, S27, S28, S29, S30, S31, S32, S33.
 
 ### Data availability
 
