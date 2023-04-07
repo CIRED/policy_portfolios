@@ -1,3 +1,5 @@
+### LOAD PACKAGES
+
 library(tidyverse)
 library(readxl)
 library(readr)
@@ -23,18 +25,19 @@ pacman::p_load('dplyr', 'tidyr', 'gapminder',
 
 SAVE_ici<-TRUE
 
+### LOAD THE DATA
+
 villes_gis<-st_read('C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/code_R/data/CentersShp_4326.shp') %>% 
   mutate(Continent = str_to_title(str_replace(Continent, "_", " ")))
 
-#results <-read_excel('C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/results_20221221.xlsx')
-#results <-read_excel('C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/robustness_20230106.xlsx')
-results <-read_excel('C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/test_congestion2.xlsx')
+#run results_analysis/results_analysis.py first
+results <-read_excel('C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/results_20221221.xlsx') #test_congestion2.xlsx, robustness_20230106.xlsx
 
-
-# on joint les données à tracer à la carte
 villes<-results %>% 
   left_join(villes_gis,by=c('City')) %>% 
   st_as_sf()
+
+### DEFINE FUNCTIONS TO PLOT THE MAPS AND DRAW THE CHARTS
 
 vincent_style<-function (position_legend="top",position_titre_horiz=0,position_titre_vertic=0) {
   font <- "Helvetica"
@@ -77,7 +80,6 @@ vincent_style_zoom<-function () {
                  plot.margin = unit(c(0,0,-6,-6),"mm"))
 }
 
-## Function for desaturating colors by specified proportion
 desat <- function(cols, sat=0.5) {
   X <- diag(c(1, sat, 1)) %*% rgb2hsv(col2rgb(cols))
   hsv(X[1,], X[2,], X[3,])
@@ -85,7 +87,6 @@ desat <- function(cols, sat=0.5) {
 
 world <- ne_countries(scale = "medium", returnclass = "sf")
 
-## fonction qui trace les cartes
 draw_my_map<-function(villes_ici,title_ici="Test",subtitle_ici="",myfunc,funcargs=list(),SAVE_ici=TRUE,position_legend="top",position_titre_horiz=0,position_titre_vertic=0,nom_specifique_fichier=NULL,texte_en_plus_nom_fichier="")
 {
   if (is.null(nom_specifique_fichier))
@@ -121,20 +122,6 @@ draw_my_map<-function(villes_ici,title_ici="Test",subtitle_ici="",myfunc,funcarg
     annotation_custom(grob = world_with_Europe, 
                       xmin = -165, xmax = -95 , ymin = -65 , ymax = 30)
   
-  # si on préfère avoir un zoom sur les USA plutôt
-  # zoom_USA<-ggplot(data=world) + 
-  #   geom_sf(fill = "antiquewhite1", lwd=0.1) + 
-  #   geom_sf(data=villes,aes(color=Continent), show.legend = FALSE)+
-  #   coord_sf(ylim = c(25,53), xlim = c(-125,-65), expand = FALSE) + #USA
-  #   xlab('') + ylab('') +
-  #   vincent_style_zoom()
-  # 
-  # world_with_USA <- ggplotGrob(zoom_USA)
-  # world_with_USA<-world_map+
-  #   annotation_custom(grob = world_with_USA, 
-  #                     xmin = -160, xmax = -80 , ymin = -65 , ymax = 10)
-  
-  
   plot(world_with_Europe,
        width = 27, 
        height = 11, 
@@ -148,7 +135,6 @@ draw_my_map<-function(villes_ici,title_ici="Test",subtitle_ici="",myfunc,funcarg
   }
 }
 
-#fonction qui fait les graphes XY
 draw_graph<-function(villes_ici,title_ici="test",SAVE_ici=TRUE,nom_specifique_fichier=NULL)
 {
   if (is.null(nom_specifique_fichier))
@@ -176,7 +162,6 @@ draw_graph<-function(villes_ici,title_ici="test",SAVE_ici=TRUE,nom_specifique_fi
   }
 }
 
-#fonction qui fait les graphes XY welfare with vs. without health co-benefits
 draw_graph_without<-function(villes_ici,title_ici="test",SAVE_ici=TRUE,nom_specifique_fichier=NULL)
 {
   if (is.null(nom_specifique_fichier))
@@ -206,6 +191,7 @@ draw_graph_without<-function(villes_ici,title_ici="test",SAVE_ici=TRUE,nom_speci
   }
 }
 
+### PLOT CITY SAMPLE
 
 title_ici="Cities studied"
 
@@ -237,19 +223,6 @@ world_with_Europe<-world_map+
   annotation_custom(grob = world_with_Europe, 
                     xmin = -165, xmax = -95 , ymin = -65 , ymax = 30)
 
-# si on préfère avoir un zoom sur les USA plutôt
-# zoom_USA<-ggplot(data=world) + 
-#   geom_sf(fill = "antiquewhite1", lwd=0.1) + 
-#   geom_sf(data=villes,aes(color=Continent), show.legend = FALSE)+
-#   coord_sf(ylim = c(25,53), xlim = c(-125,-65), expand = FALSE) + #USA
-#   xlab('') + ylab('') +
-#   vincent_style_zoom()
-# 
-# world_with_USA <- ggplotGrob(zoom_USA)
-# world_with_USA<-world_map+
-#   annotation_custom(grob = world_with_USA, 
-#                     xmin = -160, xmax = -80 , ymin = -65 , ymax = 10)
-
 
 plot(world_with_Europe,
      width = 27, 
@@ -261,8 +234,9 @@ if (SAVE_ici) {
          width = 2666/300,
          height= 1675/300,
          unit="in")
+}
 
-####### FIGURE 3 ##################
+### FIGURE 3/S11/S12/S21/S22
 
 texte_en_plus_nom_fichier<-"_intensity_quartile"
 sub_title_ici<-"Welfare variation (%)"
@@ -270,7 +244,6 @@ title_ici<-"Restrictive land-use regulations"
 villes_ici<-villes %>% 
   mutate(a_tracer=cut(welfare_2035_UGB_var, breaks=c(-Inf, -5,0, 5, Inf),
                       labels=c("less than\n-5%","between\n-5% and 0","between\n0 and +5%","more\nthan +5%")))
-#draw_my_map(villes_ici=villes_ici,title_ici=title_ici,subtitle_ici=sub_title_ici,myfunc=scale_fill_viridis_d,funcargs=list(),position_legend = "none",position_titre_horiz=0.5,position_titre_vertic=-6,texte_en_plus_nom_fichier=texte_en_plus_nom_fichier)
 draw_my_map(villes_ici=villes_ici,title_ici=title_ici,subtitle_ici=sub_title_ici,myfunc=scale_fill_manual,funcargs=list(values = c( "#D7191C",  "#FDAE61", "#A6D96A","#1A9641"),drop = FALSE),position_legend = "top",
             position_titre_horiz=0.,position_titre_vertic=0,texte_en_plus_nom_fichier=texte_en_plus_nom_fichier)
 
@@ -302,7 +275,6 @@ villes_ici<-villes %>%
   mutate(a_tracer=cut(emissions_2035_UGB_var, breaks=c(-Inf,-10,-5,-1,Inf),
                       labels=c("more\nthan -10%","between\n-10% and -5%","between\n-5% and -1%","less than\n-1%%")
   ))
-#draw_my_map(villes_ici=villes_ici,title_ici=title_ici,subtitle_ici=sub_title_ici,myfunc=scale_fill_viridis_d,funcargs=list(),position_legend = "none",position_titre_horiz=0.5,position_titre_vertic=-6,texte_en_plus_nom_fichier=texte_en_plus_nom_fichier)
 draw_my_map(villes_ici=villes_ici,title_ici=title_ici,subtitle_ici=sub_title_ici,myfunc=scale_fill_viridis_d,funcargs=list(drop = FALSE,direction=1),position_legend = "top",
             position_titre_horiz=0.,position_titre_vertic=0,texte_en_plus_nom_fichier=texte_en_plus_nom_fichier)
 
@@ -311,7 +283,6 @@ villes_ici<-villes %>%
   mutate(a_tracer=cut(emissions_2035_CT_var, breaks=c(-Inf,-10,-5,-1,Inf),
                       labels=c("more\nthan -10%","between\n-10% and -5%","between\n-5% and -1%","less than\n-1%%")
   ))
-#draw_my_map(villes_ici=villes_ici,title_ici=title_ici,subtitle_ici=sub_title_ici,myfunc=scale_fill_viridis_d,funcargs=list(),position_legend = "none",position_titre_horiz=0.5,position_titre_vertic=-6,texte_en_plus_nom_fichier=texte_en_plus_nom_fichier)
 draw_my_map(villes_ici=villes_ici,title_ici=title_ici,subtitle_ici=sub_title_ici,myfunc=scale_fill_viridis_d,funcargs=list(drop = FALSE,direction=1),position_legend = "top",
             position_titre_horiz=0.,position_titre_vertic=0,texte_en_plus_nom_fichier=texte_en_plus_nom_fichier)
 
@@ -329,14 +300,12 @@ villes_ici<-villes %>%
   mutate(a_tracer=cut(emissions_2035_BRT_var, breaks=c(-Inf,-10,-5,-1,Inf),
                       labels=c("more\nthan -10%","between\n-10% and -5%","between\n-5% and -1%","less than\n-1%%")
   ))
-#draw_my_map(villes_ici=villes_ici,title_ici=title_ici,subtitle_ici=sub_title_ici,myfunc=scale_fill_viridis_d,funcargs=list(),position_legend = "none",position_titre_horiz=0.5,position_titre_vertic=-6,texte_en_plus_nom_fichier=texte_en_plus_nom_fichier)
 draw_my_map(villes_ici=villes_ici,title_ici=title_ici,subtitle_ici=sub_title_ici,myfunc=scale_fill_viridis_d,funcargs=list(drop = FALSE,direction=1),position_legend = "top",
             position_titre_horiz=0.,position_titre_vertic=0,texte_en_plus_nom_fichier=texte_en_plus_nom_fichier)
 
 texte_en_plus_nom_fichier<-"_intensity_quartile"
 sub_title_ici<-"Welfare variation (%)"
 title_ici<-"Impact of the combined four policies"
-#title_ici<-""
 nom_specifique_fichier<-"all policies"
 villes_ici<-villes %>% 
   mutate(a_tracer=welfare_2035_all_var) %>% 
@@ -345,7 +314,6 @@ villes_ici<-villes %>%
                                "between\n-5% and 0",
                                "between\n0 and +5%",
                                "more\nthan +5%")))
-#draw_my_map(villes_ici=villes_ici,title_ici=title_ici,subtitle_ici=sub_title_ici,myfunc=scale_fill_viridis_d,funcargs=list(),position_legend = "none",position_titre_horiz=0.5,position_titre_vertic=-6,texte_en_plus_nom_fichier=texte_en_plus_nom_fichier)
 draw_my_map(villes_ici=villes_ici,
             title_ici=title_ici,
             subtitle_ici=sub_title_ici,
@@ -361,9 +329,6 @@ draw_my_map(villes_ici=villes_ici,
             nom_specifique_fichier=nom_specifique_fichier
 )
 
-
-
-
 title_ici<-"Impact of the combined four policies"
 nom_specifique_fichier<-"all policies"
 texte_en_plus_nom_fichier<-"emission_intensity_quartile"
@@ -373,13 +338,11 @@ villes_ici<-villes %>%
   mutate(a_tracer=cut(a_tracer, breaks=c(-Inf,-30,-20,-10,Inf),
                       labels=c("more\nthan -30%","between\n-30% and -20%","between\n-20% and -10%","less than\n-10%")
   ))
-#draw_my_map(villes_ici=villes_ici,title_ici=title_ici,subtitle_ici=sub_title_ici,myfunc=scale_fill_viridis_d,funcargs=list(),position_legend = "none",position_titre_horiz=0.5,position_titre_vertic=-6,texte_en_plus_nom_fichier=texte_en_plus_nom_fichier)
 draw_my_map(villes_ici=villes_ici,title_ici=title_ici,subtitle_ici=sub_title_ici,myfunc=scale_fill_viridis_d,funcargs=list(drop = FALSE,direction=1),position_legend = "top",
             position_titre_horiz=0.,position_titre_vertic=0,texte_en_plus_nom_fichier=texte_en_plus_nom_fichier,nom_specifique_fichier=nom_specifique_fichier)
 
-####### END FIGURE 3 ###########################################################
+### FIGURE S17/S28
 
-######################################## FIGURE S13 ###########################
 title_ici="Fuel Tax"
 villes_ici %>% mutate(
   emissions_2035_a_tracer_var=emissions_2035_CT_var,
@@ -404,8 +367,6 @@ villes_ici %>% mutate(
   welfare_2035_a_tracer_var=welfare_2035_UGB_var
 ) %>% draw_graph(.,title_ici,SAVE_ici)
 
-############################################ END FIGURE S13 ####################
-
 welfare_var_mean<-villes %>% 
   st_drop_geometry() %>% 
   mutate(welfare_pondere=welfare_2035_all_var*population_2035,
@@ -414,12 +375,6 @@ welfare_var_mean<-villes %>%
   summarise(welfare_pondere=sum(welfare_pondere)/sum(population_2035),
             welfare_pondere_without=sum(welfare_pondere_without)/sum(population_2035),
             emissions_pondere=sum(emissions_pondere)/sum(population_2035)) 
-
-
-```
-global emission reduction is `r welfare_var_mean$emissions_pondere`% and mean welfare variation is `r welfare_var_mean$welfare_pondere`% including `r welfare_var_mean$welfare_pondere_without`% of financial welfare variation and `r welfare_var_mean$welfare_pondere-welfare_var_mean$welfare_pondere_without`
-
-## welfare intensite discrete
 
 texte_en_plus_nom_fichier<-"_intensity_quartile"
 sub_title_ici<-"Welfare variation (%)"
@@ -433,7 +388,6 @@ villes_ici<-villes %>%
                                "between\n-5% and 0",
                                "between\n0 and +5%",
                                "more\nthan +5%")))
-#draw_my_map(villes_ici=villes_ici,title_ici=title_ici,subtitle_ici=sub_title_ici,myfunc=scale_fill_viridis_d,funcargs=list(),position_legend = "none",position_titre_horiz=0.5,position_titre_vertic=-6,texte_en_plus_nom_fichier=texte_en_plus_nom_fichier)
 draw_my_map(villes_ici=villes_ici,
             title_ici=title_ici,
             subtitle_ici=sub_title_ici,
@@ -450,8 +404,6 @@ draw_my_map(villes_ici=villes_ici,
 )
 
 
-
-
 title_ici<-"Impact of the combined four policies"
 nom_specifique_fichier<-"all policies"
 texte_en_plus_nom_fichier<-"emission_intensity_quartile"
@@ -461,11 +413,10 @@ villes_ici<-villes %>%
   mutate(a_tracer=cut(a_tracer, breaks=c(-Inf,-30,-20,-10,Inf),
                       labels=c("more\nthan -30%","between\n-30% and -20%","between\n-20% and -10%","less than\n-10%")
   ))
-#draw_my_map(villes_ici=villes_ici,title_ici=title_ici,subtitle_ici=sub_title_ici,myfunc=scale_fill_viridis_d,funcargs=list(),position_legend = "none",position_titre_horiz=0.5,position_titre_vertic=-6,texte_en_plus_nom_fichier=texte_en_plus_nom_fichier)
 draw_my_map(villes_ici=villes_ici,title_ici=title_ici,subtitle_ici=sub_title_ici,myfunc=scale_fill_viridis_d,funcargs=list(drop = FALSE,direction=1),position_legend = "top",
             position_titre_horiz=0.,position_titre_vertic=0,texte_en_plus_nom_fichier=texte_en_plus_nom_fichier,nom_specifique_fichier=nom_specifique_fichier)
 
-#####################################??? FIGURE S11 ###############################
+### FIGURE S15/S26
 
 title_ici<-"Impact of the combined four policies"
 nom_specifique_fichier<-"all_policies"
@@ -478,463 +429,7 @@ villes_ici %>% mutate(
 ) %>% draw_graph(.,title_ici,SAVE_ici,nom_specifique_fichier=nom_specifique_fichier)
 
 
-#####################################END FIGURE S11 ###############################
-
-# boxplot
-
-## emissions
-
-
-villes %>% 
-  st_drop_geometry() %>% 
-  ggplot(aes(x="",y=emissions_2035_all_var))+
-  geom_boxplot(outlier.shape = NA,color="#66c2a5", fill="#66c2a5", alpha=0.1)+
-  geom_jitter()+
-  bbc_style()+
-  geom_hline(yintercept = 0, size = 0.5, colour="#333333") +
-  geom_vline(xintercept = 0, size = 0.5, colour="#333333") +
-  #scale_fill_manual(values = country_colors) +
-  bbc_style() +
-  labs(title="title_ici",
-       subtitle = "")
-
-tmp<-villes %>% 
-  st_drop_geometry() %>%
-  select(c(City,population_2035,emissions_2035_all_var,welfare_2035_all_var))%>% 
-  summarise(emissions_2035_all_var=sum(emissions_2035_all_var*population_2035)/sum(population_2035),
-            welfare_2035_all_var=sum(welfare_2035_all_var*population_2035)/sum(population_2035)) %>% 
-  pivot_longer(c(1,2))
-
-p<-villes %>% 
-  st_drop_geometry() %>%
-  select(c(City,population_2035,emissions_2035_all_var,welfare_2035_all_var))%>%
-  pivot_longer(-c(1,2)) %>% 
-  ggplot(aes(x=name,y=value))+
-  geom_bar(data=tmp,aes(x=name,y=value,fill=name),stat = "identity",alpha=0.8)+
-  geom_jitter(color="grey45")+
-  geom_boxplot(outlier.shape = NA, fill="#66c2a5", alpha=0.)+
-  bbc_style()+
-  geom_hline(yintercept = 0, size = 0.5, colour="#333333") +
-  geom_vline(xintercept = 0, size = 0.5, colour="#333333") +
-  #scale_fill_manual(values = country_colors) +
-  bbc_style() +
-  labs(title="Impact all four policies combined",
-       subtitle = "Variation with respect to BAU scenario (%)")#+
-#ylim(-40,2)
-
-if (SAVE_ici) {
-  ggsave(paste0("./outputs/box_plot_combined.png"),plot=p,
-         width = 2666/300,
-         height= 1875/300,
-         unit="in")
-}
-
-p
-
-```
-
-## calcul mean et mediane
-
-```{r}
-tmp_mean<-villes %>% 
-  st_drop_geometry() %>%
-  select(c(City,population_2035,emissions_2035_CT_var,welfare_2035_CT_var,
-           emissions_2035_FE_var,welfare_2035_FE_var,
-           emissions_2035_BRT_var,welfare_2035_BRT_var,
-           emissions_2035_UGB_var,welfare_2035_UGB_var,
-           emissions_2035_all_var,welfare_2035_all_var))%>%
-  summarise(emissions_2035_CT_var=sum(emissions_2035_CT_var*population_2035)/sum(population_2035),
-            welfare_2035_CT_var=sum(welfare_2035_CT_var*population_2035)/sum(population_2035),
-            emissions_2035_FE_var=sum(emissions_2035_FE_var*population_2035)/sum(population_2035),
-            welfare_2035_FE_var=sum(welfare_2035_FE_var*population_2035)/sum(population_2035),
-            emissions_2035_BRT_var=sum(emissions_2035_BRT_var*population_2035)/sum(population_2035),
-            welfare_2035_BRT_var=sum(welfare_2035_BRT_var*population_2035)/sum(population_2035),
-            emissions_2035_UGB_var=sum(emissions_2035_UGB_var*population_2035)/sum(population_2035),
-            welfare_2035_UGB_var=sum(welfare_2035_UGB_var*population_2035)/sum(population_2035),
-            emissions_2035_all_var=sum(emissions_2035_all_var*population_2035)/sum(population_2035),
-            welfare_2035_all_var=sum(welfare_2035_all_var*population_2035)/sum(population_2035),
-  )%>% 
-  pivot_longer(everything())%>% 
-  separate(name,into=c("variable",NA,"policy",NA)) %>% 
-  rename(mean=value)
-
-tmp_median<-villes %>% 
-  st_drop_geometry() %>%
-  select(c(City,population_2035,emissions_2035_CT_var,welfare_2035_CT_var,
-           emissions_2035_FE_var,welfare_2035_FE_var,
-           emissions_2035_BRT_var,welfare_2035_BRT_var,
-           emissions_2035_UGB_var,welfare_2035_UGB_var,
-           emissions_2035_all_var,welfare_2035_all_var ))%>%
-  pivot_longer(-c(1,2))%>%
-  group_by(name) %>% 
-  summarise(value=median(value)) %>% 
-  separate(name,into=c("variable",NA,"policy",NA)) %>% 
-  rename(median=value)
-
-tmp_quartile1<-villes %>% 
-  st_drop_geometry() %>%
-  select(c(City,population_2035,emissions_2035_CT_var,welfare_2035_CT_var,
-           emissions_2035_FE_var,welfare_2035_FE_var,
-           emissions_2035_BRT_var,welfare_2035_BRT_var,
-           emissions_2035_UGB_var,welfare_2035_UGB_var,
-           emissions_2035_all_var,welfare_2035_all_var ))%>%
-  pivot_longer(-c(1,2))%>%
-  group_by(name) %>% 
-  summarise(value=quantile(value,0.25)) %>% 
-  separate(name,into=c("variable",NA,"policy",NA)) %>% 
-  rename(quartile25=value)
-
-tmp_quartile2<-villes %>% 
-  st_drop_geometry() %>%
-  select(c(City,population_2035,emissions_2035_CT_var,welfare_2035_CT_var,
-           emissions_2035_FE_var,welfare_2035_FE_var,
-           emissions_2035_BRT_var,welfare_2035_BRT_var,
-           emissions_2035_UGB_var,welfare_2035_UGB_var,
-           emissions_2035_all_var,welfare_2035_all_var ))%>%
-  pivot_longer(-c(1,2))%>%
-  group_by(name) %>% 
-  summarise(value=quantile(value,0.75)) %>% 
-  separate(name,into=c("variable",NA,"policy",NA))%>% 
-  rename(quartile75=value)
-
-villes_mean_median<-tmp_mean %>% 
-  left_join(.,tmp_median)%>% 
-  left_join(.,tmp_quartile1) %>%
-  left_join(.,tmp_quartile2) 
-```
-
-## bars all policies
-p<-villes %>% 
-  st_drop_geometry() %>%
-  select(c(City,population_2035,emissions_2035_CT_var,welfare_2035_CT_var,
-           emissions_2035_FE_var,welfare_2035_FE_var,
-           emissions_2035_BRT_var,welfare_2035_BRT_var,
-           emissions_2035_UGB_var,welfare_2035_UGB_var))%>%
-  pivot_longer(-c(1,2))%>% 
-  separate(name,into=c("variable",NA,"policy",NA)) %>% 
-  ggplot(aes(x=policy,y=value,fill=variable))+
-  geom_jitter(aes(fill=variable),
-              position=position_jitterdodge(dodge.width = 0.9,),
-              shape=21,
-              alpha=0.3,
-              color="black")+
-  geom_bar(data=villes_mean_median,aes(x=policy,y=mean,fill=variable),
-           stat = "identity",
-           position = position_dodge(width = .9),
-           alpha=0.6,
-           vjust = 0.5 ,
-           color="black")+
-  #geom_boxplot(outlier.shape = NA, alpha=0.5)+
-  bbc_style()+
-  geom_hline(yintercept = 0, size = 0.5, colour="#333333") +
-  #scale_fill_manual(values = country_colors) +
-  geom_label(data=villes_mean_median,
-             aes(x = policy, 
-                 y = 7,
-                 label = ifelse(mean>0,paste0("+",round(mean, digits=1),"%"),paste0(round(mean, digits=1),"%")),
-                 group=variable),
-             hjust = 0.5, 
-             vjust = 1, 
-             label.size = NA, 
-             fill=NA,
-             family="Helvetica", 
-             size = 5,
-             position = position_dodge(width = .9),
-             face="bold")+
-  bbc_style() +
-  labs(title="Impact of each policy",
-       subtitle = "Global variation with respect to BAU scenario (%)")+
-  #ylim(-25,10)+
-  scale_x_discrete(labels=c("All 4 policies\ncombined","Bus Rapid\nTransit","Fuel\nTax","Fuel\nEfficiency","Urban Growth\nBoundary"))
-
-p#
-
-if (SAVE_ici) {
-  ggsave(paste0("./outputs/box_plot_policies_bar.png"),plot=p,
-         width = 2666/300,
-         height= 1875/300,
-         unit="in")
-}
-
-
-
-
-## boxplots all policies
-
-p<-villes %>% 
-  st_drop_geometry() %>%
-  select(c(City,population_2035,emissions_2035_CT_var,welfare_2035_CT_var,
-           emissions_2035_FE_var,welfare_2035_FE_var,
-           emissions_2035_BRT_var,welfare_2035_BRT_var,
-           emissions_2035_UGB_var,welfare_2035_UGB_var,
-           emissions_2035_all_var,welfare_2035_all_var))%>%
-  pivot_longer(-c(1,2))%>% 
-  separate(name,into=c("variable",NA,"policy",NA)) %>% 
-  ggplot(aes(x=policy,y=value,fill=variable))+
-  geom_jitter(aes(fill=variable),
-              position=position_jitterdodge(dodge.width = 0.9,),
-              shape=21,
-              alpha=0.3,
-              color="black")+
-  # geom_bar(data=tmp,aes(x=policy,y=value,fill=variable),
-  #          stat = "identity",
-  #          position = position_dodge(width = .9),
-  #          alpha=0.6,
-  #          vjust = 0.5 ,
-  #          color="black")+
-  geom_boxplot(outlier.shape = NA, alpha=0.5,position = position_dodge(width = .9))+
-  bbc_style()+
-  geom_hline(yintercept = 0, size = 0.5, colour="#333333") +
-  #scale_fill_manual(values = country_colors) +
-  geom_label(data=villes_mean_median,
-             aes(x = policy, 
-                 y = 15,
-                 label = ifelse(mean>0,paste0("+",round(mean, digits=1),"%"),paste0(round(mean, digits=1),"%")),
-                 #paste0(
-                 #ifelse(mean>0,paste0("+",round(mean, digits=1),"%"),paste0(round(mean, digits=1),"%")),
-                 # "\n",
-                 # round(median, digits=1)," (",round(quartile25, digits=1)," / ",round(quartile75, digits=1),")"),
-                 # ifelse(median>0,paste0("+",round(median, digits=1),"%"),paste0(round(median, digits=1),"%")),
-                 #  "\n",
-                 #  "(",round(quartile25, digits=1)," / ",round(quartile75, digits=1),")"
-                 #),
-                 group=variable),
-             hjust = 0.5, 
-             vjust = 1, 
-             label.size = NA, 
-             fill=NA,
-             family="Helvetica", 
-             size = 3,
-             position = position_dodge(width = .9),
-             face="bold")+
-  bbc_style() +
-  #ylim(-25,10)+
-  scale_x_discrete(labels=c("All 4 policies\ncombined","Bus Rapid\nTransit","Fuel\nTax","Fuel\nEfficiency","Urban Growth\nBoundary"))+
-  labs(title="Impact of each policy",
-       subtitle = "Global variation with respect to BAU scenario (%)")
-
-
-p#
-
-if (SAVE_ici) {
-  ggsave(paste0("./outputs/box_plot_policies.png"),plot=p,
-         width = 2666/300,
-         height= 1875/300,
-         unit="in")
-}
-
-
-
-
-p<-villes %>% 
-  st_drop_geometry() %>%
-  select(c(City,population_2035,emissions_2035_CT_var,welfare_2035_CT_var,
-           emissions_2035_FE_var,welfare_2035_FE_var,
-           emissions_2035_BRT_var,welfare_2035_BRT_var,
-           emissions_2035_UGB_var,welfare_2035_UGB_var,
-           emissions_2035_all_var,welfare_2035_all_var))%>%
-  pivot_longer(-c(1,2))%>% 
-  separate(name,into=c("variable",NA,"policy",NA)) %>% 
-  ggplot(aes(x=policy,y=value,fill=variable))+
-  geom_jitter(aes(fill=variable),
-              position=position_jitterdodge(dodge.width = 0.9,),
-              shape=21,
-              alpha=0.3,
-              color="black")+
-  # geom_bar(data=tmp,aes(x=policy,y=value,fill=variable),
-  #          stat = "identity",
-  #          position = position_dodge(width = .9),
-  #          alpha=0.6,
-  #          vjust = 0.5 ,
-  #          color="black")+
-  geom_boxplot(outlier.shape = NA, alpha=0.5,position = position_dodge(width = .9))+
-  bbc_style()+
-  geom_hline(yintercept = 0, size = 0.5, colour="#333333") +
-  #scale_fill_manual(values = country_colors) +
-  geom_label(data=villes_mean_median,
-             aes(x = policy, 
-                 y = 20,
-                 # label = ifelse(mean>0,paste0("+",round(mean, digits=1),"%"),paste0(round(mean, digits=1),"%")),
-                 label = paste0(
-                   ifelse(median>0,paste0("+",round(median, digits=1),"%"),paste0(round(median, digits=1),"%")),
-                   "\n",
-                   "(",round(quartile25, digits=1),"% / ",round(quartile75, digits=1),"%)"
-                 ),
-                 group=variable),
-             hjust = 0.5, 
-             vjust = 1, 
-             label.size = NA, 
-             fill=NA,
-             family="Helvetica", 
-             size = 5,
-             position = position_dodge(width = .9),
-             face="bold")+
-  bbc_style() +
-  facet_grid(rows=vars(variable),scales="free_y")+
-  #ylim(-25,10)+
-  scale_x_discrete(labels=c("All 4 policies\ncombined","Bus Rapid\nTransit","Fuel\nTax","Fuel\nEfficiency","Urban Growth\nBoundary"))+
-  labs(title="Impact of each policy",
-       subtitle = "Global variation with respect to BAU scenario")+
-  theme(panel.spacing.y = unit(2,"line"),panel.border = element_rect(colour = "black", fill=NA, size=1))+
-  scale_y_continuous(labels = function(x) paste0(x, "%"))
-
-
-
-p# 
-
-if (SAVE_ici) {
-  ggsave(paste0("./outputs/box_plot_policies_version1.png"),plot=p,
-         width = 2666/300,
-         #height= 1875/300,
-         height = 2666/300,
-         unit="in")
-}
-
-
-
-
-p<-villes %>% 
-  st_drop_geometry() %>%
-  select(c(City,population_2035,emissions_2035_CT_var,welfare_2035_CT_var,
-           emissions_2035_FE_var,welfare_2035_FE_var,
-           emissions_2035_BRT_var,welfare_2035_BRT_var,
-           emissions_2035_UGB_var,welfare_2035_UGB_var,
-           emissions_2035_all_var,welfare_2035_all_var))%>%
-  pivot_longer(-c(1,2))%>% 
-  separate(name,into=c("variable",NA,"policy",NA)) %>% 
-  ggplot(aes(x=policy,y=value,fill=variable))+
-  geom_jitter(aes(fill=variable),
-              position=position_jitterdodge(dodge.width = 0.9,),
-              shape=21,
-              alpha=0.3,
-              color="black")+
-  # geom_bar(data=tmp,aes(x=policy,y=value,fill=variable),
-  #          stat = "identity",
-  #          position = position_dodge(width = .9),
-  #          alpha=0.6,
-  #          vjust = 0.5 ,
-  #          color="black")+
-  geom_boxplot(outlier.shape = NA, alpha=0.5,position = position_dodge(width = .9))+
-  bbc_style()+
-  geom_hline(yintercept = 0, size = 0.5, colour="#333333") +
-  #scale_fill_manual(values = country_colors) +
-  geom_label(data=villes_mean_median,
-             aes(x = policy, 
-                 y = 7,
-                 label = ifelse(mean>0,paste0("+",round(mean, digits=1),"%"),paste0(round(mean, digits=1),"%")),
-                 # label = paste0(
-                 # ifelse(median>0,paste0("+",round(median, digits=1),"%"),paste0(round(median, digits=1),"%")),
-                 #  "\n",
-                 #  "(",round(quartile25, digits=1),"% / ",round(quartile75, digits=1),"%)"
-                 # ),
-                 group=variable),
-             hjust = 0.5, 
-             vjust = 1, 
-             label.size = NA, 
-             fill=NA,
-             family="Helvetica", 
-             size = 5,
-             position = position_dodge(width = .9),
-             face="bold")+
-  bbc_style() +
-  facet_grid(rows=vars(variable),scales="free_y")+
-  #ylim(-25,10)+
-  scale_x_discrete(labels=c("All 4 policies\ncombined","Bus Rapid\nTransit","Fuel\nTax","Fuel\nEfficiency","Urban Growth\nBoundary"))+
-  labs(title="Impact of each policy",
-       subtitle = "Global variation with respect to BAU scenario")+
-  theme(panel.spacing.y = unit(2,"line"),panel.border = element_rect(colour = "black", fill=NA, size=1))+
-  scale_y_continuous(labels = function(x) paste0(x, "%"))
-
-
-
-p# 
-
-if (SAVE_ici) {
-  ggsave(paste0("./outputs/box_plot_policies_version2.png"),plot=p,
-         width = 2666/300,
-         #height= 1875/300,
-         height = 2666/300,
-         unit="in")
-}
-
-
-
-## version 4
-
-
-
-
-p<-villes %>% 
-  st_drop_geometry() %>%
-  select(c(City,population_2035,emissions_2035_CT_var,welfare_2035_CT_var,
-           emissions_2035_FE_var,welfare_2035_FE_var,
-           emissions_2035_BRT_var,welfare_2035_BRT_var,
-           emissions_2035_UGB_var,welfare_2035_UGB_var,
-           emissions_2035_all_var,welfare_2035_all_var))%>%
-  pivot_longer(-c(1,2))%>% 
-  separate(name,into=c("variable",NA,"policy",NA)) %>% 
-  filter(variable=="emissions") %>% 
-  ggplot(aes(x=policy,y=value,fill=variable))+
-  geom_jitter(aes(fill=variable),
-              position=position_jitterdodge(dodge.width = 0.9,),
-              shape=21,
-              alpha=0.3,
-              color="black")+
-  # geom_bar(data=tmp,aes(x=policy,y=value,fill=variable),
-  #          stat = "identity",
-  #          position = position_dodge(width = .9),
-  #          alpha=0.6,
-  #          vjust = 0.5 ,
-  #          color="black")+
-  geom_boxplot(outlier.shape = NA, alpha=0.5,position = position_dodge(width = .9))+
-  bbc_style()+
-  geom_hline(yintercept = 0, size = 0.5, colour="#333333") +
-  #scale_fill_manual(values = country_colors) +
-  geom_label(data=villes_mean_median %>% filter(variable=="emissions"),
-             aes(x = policy, 
-                 y = 15,
-                 # label = ifelse(mean>0,paste0("+",round(mean, digits=1),"%"),paste0(round(mean, digits=1),"%")),
-                 label = paste0(
-                   ifelse(median>0,paste0("+",round(median, digits=1),"%"),paste0(round(median, digits=1),"%")),
-                   "\n",
-                   "(",round(quartile25, digits=1),"% / ",round(quartile75, digits=1),"%)"
-                 ),
-                 group=variable),
-             hjust = 0.5, 
-             vjust = 1, 
-             label.size = NA, 
-             fill=NA,
-             family="Helvetica", 
-             size = 5,
-             position = position_dodge(width = .9),
-             face="bold")+
-  bbc_style() +
-  facet_grid(rows=vars(variable),scales="free_y")+
-  #ylim(-25,10)+
-  scale_x_discrete(labels=c("All 4 policies\ncombined","Bus Rapid\nTransit","Fuel\nTax","Fuel\nEfficiency","Urban Growth\nBoundary"))+
-  labs(title="Emission variations",
-       subtitle = "Variation with respect to BAU scenario")+
-  theme(panel.spacing.y = unit(2,"line"),panel.border = element_rect(colour = "black", fill=NA, size=1),
-        legend.position = 'none')+
-  scale_y_continuous(labels = function(x) paste0(x, "%"))
-
-
-
-p# 
-
-if (SAVE_ici) {
-  ggsave(paste0("./outputs/box_plot_policies_version4.png"),plot=p,
-         width = 2666/300,
-         height= 1875/300,
-         #height = 2666/300,
-         unit="in")
-}
-
-
-
-####### FIGURE 1 ##################
-
-
+### FIGURE 1/S23/S32
 
 tmp<-villes %>% 
   st_drop_geometry() %>%
@@ -1029,19 +524,7 @@ if (SAVE_ici) {
          unit="in")
 }
 
-####### END FIGURE 1 ##################
-
-
-
-
-# decomposition welfare variation
-
-## boxplot
-
-##########  FIGURE S9 #################################################
-
-
-
+### FIGURE S13/S24
 
 tmp<-villes %>% 
   st_drop_geometry() %>%
@@ -1119,21 +602,8 @@ if (SAVE_ici) {
          height = 2666/300*1.2,
          unit="in")
 }
-########## END FIGURE S9 #################################################
 
-
-
-
-
-
-
-title_ici="All policies"
-villes_ici %>% mutate(
-  expenses_2035_a_tracer_var=welfare_2035_all_var_without,
-  health_2035_a_tracer_var=welfare_2035_all_var-welfare_2035_all_var_without
-) %>% draw_graph_without(.,title_ici,SAVE_ici)
-
-####################################  FIGURE 10 ###############################
+### FIGURE S14/S25
 
 title_ici="Fuel Tax"
 villes_ici %>% mutate(
@@ -1159,41 +629,8 @@ villes_ici %>% mutate(
   health_2035_a_tracer_var=welfare_2035_UGB_var-welfare_2035_UGB_var_without
 ) %>% draw_graph_without(.,title_ici,SAVE_ici)
 
-#################################### END FIGURE 10 ###############################
 
-# fine welfare variation 
-
-## agregé
-
-#resultat des simulations avec chaque policy séparément
-p<-villes %>% 
-  select(-c(3,4)) %>% 
-  pivot_longer(-1,values_to = "Variation") %>%
-  mutate(financial=ifelse(grepl("cost",name),"Variations in\nfinancial expenses","Health co-benefit")) %>% 
-  ggplot(aes(x=policy,y=Variation,fill=financial))+
-  geom_bar(stat = "Identity")+
-  facet_wrap('name',scales = "free_y")+
-  scale_y_continuous(labels = function(x) paste0(x, "%"))+
-  scale_x_discrete(labels=c("Bus Rapid\nTransit","Fuel\nTax","Fuel\nEfficiency","Urban Growth\nBoundary"))+
-  bbc_style()+
-  geom_hline(yintercept = 0, size = 0.5, colour="#333333") +
-  labs(title="Impact of each policy on welfare components",
-       subtitle = "Average impact of each policy")+
-  theme(panel.spacing.y = unit(2,"line"),
-        panel.border = element_rect(colour = "black", fill=NA, size=1),
-        legend.position = "top")+
-  scale_fill_manual(values = c( "#1380A1","#FAAB18")) 
-
-p
-
-if (SAVE_ici) {
-  ggsave(paste0("./outputs/decompo_fine_welfare.png"),plot=p,
-         width = 2666/150,
-         height= 1875/150,
-         unit="in")
-}
-
-########## FIGURE 2 #################################################
+### FIGURE 2/S33
 
 var_cobenefits<-results[c("var_active_modes_CT",
                          "var_active_modes_FE",
@@ -1239,7 +676,7 @@ var_cobenefits<-results[c("var_active_modes_CT",
   mutate(var_disp_income_FE=0) %>% 
   mutate(var_disp_income_UGB=0)
 
-#resultat des simulations avec chaque policy séparément
+
 p<-var_cobenefits %>% 
   pivot_longer(-c(population_2035),values_to = "Variation") %>%
   mutate(financial=ifelse(grepl("cost",name) | grepl("rent",name)| grepl("income",name),"Variations in\nfinancial expenses","Health co-benefit")) %>%
@@ -1259,7 +696,7 @@ p<-var_cobenefits %>%
     grepl("rent",name) ~ "Average housing costs",
     grepl("tcost",name) ~ "Average transportation costs",
     grepl("disp_income",name) ~ "Disposable income",
-    TRUE ~"zz" # juste pour vérifier qu'il n'y a pas de problème
+    TRUE ~"zz" # juste pour v?rifier qu'il n'y a pas de probl?me
   ))%>% 
   filter(!(policy %in% c("Welfare increasing","All policies"))) %>% 
   mutate(benefit=factor(benefit, levels=c("Active mode use",
@@ -1300,33 +737,7 @@ if (SAVE_ici) {
          unit="in")
 }
 
-########## END FIGURE 2 #################################################
-
-
-######## FIGURE S14 ##########################################################
-tmp<-villes %>% 
-  st_drop_geometry() %>%
-  select(c(City,
-           welfare_2035_CT_var,
-           welfare_2035_FE_var,
-           welfare_2035_BRT_var,
-           welfare_2035_UGB_var)) %>% 
-  pivot_longer(-1) %>% 
-  mutate(value=(value>=0)) %>% 
-  group_by(City) %>% 
-  summarise(a_tracer=factor(sum(value),levels=c(1,2,3))) %>% 
-  left_join(villes)
-
-nom_specifique_fichier="map_policies_increasing_welfare"
-title_ici<-"Number of welfare-increasing policies"
-draw_my_map(villes_ici=tmp,title_ici=title_ici,myfunc=scale_fill_viridis_d,funcargs=list(direction=1),position_legend = "top",texte_en_plus_nom_fichier="",position_titre_vertic=-5)
-# draw_my_map(villes_ici=tmp,title_ici=title_ici,subtitle_ici=sub_title_ici,myfunc=scale_fill_manual,funcargs=list(values = c( "#D7191C",  "#FDAE61", "#A6D96A","#1A9641"),drop = FALSE),position_legend = "top",
-#             position_titre_horiz=0.,position_titre_vertic=0,nom_specifique_fichier=nom_specifique_fichier)
-
-
-########## END FIGURE S14 #################################################
-
-################# FIGURE S15 #################################################
+### FIGURE S18/S29
 
 tmp_mean<-villes %>% 
   st_drop_geometry() %>%
@@ -1364,10 +775,7 @@ p<-villes %>%
   theme(panel.spacing.y = unit(2,"line"),panel.border = element_rect(colour = "black", fill=NA, size=1),legend.position="None")+
   scale_y_continuous(labels = function(x) paste0(x, "%"))
 
-
-
-
-p# 
+p
 
 if (SAVE_ici) {
   ggsave(paste0("./outputs/box_plot_policies_increasing.png"),plot=p,
@@ -1378,10 +786,7 @@ if (SAVE_ici) {
 }
 
 
-################# END FIGURE S15 #################################################
-
-
-################# FIGURE S17 #####################################################
+### FIGURE S20/S31
 
 nom_specifique_fichier="XY welfare increasing"
 title_ici="Impact of the welfare-increasing\npolicy portfolio"
@@ -1399,10 +804,7 @@ draw_my_map(villes_ici=villes_ici,title_ici=title_ici,subtitle_ici=sub_title_ici
             position_titre_horiz=0.,position_titre_vertic=0,texte_en_plus_nom_fichier=texte_en_plus_nom_fichier,nom_specifique_fichier=nom_specifique_fichier)
 
 
-
-################ END FIGURE S17 #####################################################################
-
-############### FIGURE S16 #################################################################
+### FIGURE S19/S30
 
 nom_specifique_fichier="XY welfare increasing"
 title_ici="Impact of the welfare-increasing\npolicy portfolio"
@@ -1417,22 +819,8 @@ villes_ici<-villes %>%
 draw_my_map(villes_ici=villes_ici,title_ici=title_ici,subtitle_ici=sub_title_ici,myfunc=scale_fill_viridis_d,funcargs=list(drop = FALSE,direction=1),position_legend = "top",
             position_titre_horiz=0.,position_titre_vertic=0,texte_en_plus_nom_fichier=texte_en_plus_nom_fichier,nom_specifique_fichier=nom_specifique_fichier)
 
-####################################################################################
 
-nom_specifique_fichier="XY welfare increasing"
-title_ici="Impact of welfare-increasing policies only"
-villes %>% mutate(
-  emissions_2035_a_tracer_var=emissions_2035_all_welfare_increasing_var,
-  welfare_2035_a_tracer_var=welfare_2035_all_welfare_increasing_var
-) %>% draw_graph(.,title_ici,SAVE_ici,nom_specifique_fichier=nom_specifique_fichier)
-
-
-
-
-
-
-
-############################## FIGURE S12 #######################################
+### FIGURE S16/S27
 
 mod <- lm( log(-emissions_2035_all_welfare_increasing_var) ~ welfare_2035_all_welfare_increasing_var, data = villes) 
 summary(mod)
@@ -1461,110 +849,3 @@ if (SAVE_ici) {
          height= 1875/300,
          unit="in")
 }
-
-############################ END FIGURE S12 ##########################################################
-
-
-
-## boxplot all with welfare increasing
-
-tmp_mean<-villes %>% 
-  st_drop_geometry() %>%
-  select(c(City,population_2035,emissions_2035_CT_var,welfare_2035_CT_var,
-           emissions_2035_FE_var,welfare_2035_FE_var,
-           emissions_2035_BRT_var,welfare_2035_BRT_var,
-           emissions_2035_UGB_var,welfare_2035_UGB_var,
-           emissions_2035_all_var,welfare_2035_all_var,
-           emissions_2035_all_welfare_increasing_var,welfare_2035_all_welfare_increasing_var
-  ))%>%
-  summarise(emissions_2035_CT_var=sum(emissions_2035_CT_var*population_2035)/sum(population_2035),
-            welfare_2035_CT_var=sum(welfare_2035_CT_var*population_2035)/sum(population_2035),
-            emissions_2035_FE_var=sum(emissions_2035_FE_var*population_2035)/sum(population_2035),
-            welfare_2035_FE_var=sum(welfare_2035_FE_var*population_2035)/sum(population_2035),
-            emissions_2035_BRT_var=sum(emissions_2035_BRT_var*population_2035)/sum(population_2035),
-            welfare_2035_BRT_var=sum(welfare_2035_BRT_var*population_2035)/sum(population_2035),
-            emissions_2035_UGB_var=sum(emissions_2035_UGB_var*population_2035)/sum(population_2035),
-            welfare_2035_UGB_var=sum(welfare_2035_UGB_var*population_2035)/sum(population_2035),
-            emissions_2035_all_var=sum(emissions_2035_all_var*population_2035)/sum(population_2035),
-            welfare_2035_all_var=sum(welfare_2035_all_var*population_2035)/sum(population_2035),
-            welfare_2035_all_welfare_increasing_var=sum(welfare_2035_all_welfare_increasing_var*population_2035)/sum(population_2035),
-            emissions_2035_all_welfare_increasing_var=sum(emissions_2035_all_welfare_increasing_var*population_2035)/sum(population_2035),
-  )%>% 
-  rename("welfare_2035_welfareincreasing_var"=welfare_2035_all_welfare_increasing_var,
-         "emissions_2035_welfareincreasing_var"=emissions_2035_all_welfare_increasing_var) %>% 
-  pivot_longer(everything())%>% 
-  separate(name,into=c("variable",NA,"policy",NA)) %>% 
-  rename(mean=value)
-
-p<-villes %>% 
-  st_drop_geometry() %>%
-  select(c(City,population_2035,emissions_2035_CT_var,welfare_2035_CT_var,
-           emissions_2035_FE_var,welfare_2035_FE_var,
-           emissions_2035_BRT_var,welfare_2035_BRT_var,
-           emissions_2035_UGB_var,welfare_2035_UGB_var,
-           emissions_2035_all_var,welfare_2035_all_var,
-           welfare_2035_all_welfare_increasing_var,
-           emissions_2035_all_welfare_increasing_var))%>%
-  rename("welfare_2035_welfareincreasing_var"=welfare_2035_all_welfare_increasing_var,
-         "emissions_2035_welfareincreasing_var"=emissions_2035_all_welfare_increasing_var) %>% 
-  pivot_longer(-c(1,2))%>% 
-  separate(name,into=c("variable",NA,"policy",NA))%>% 
-  ggplot(aes(x=policy,y=value,fill=variable))+
-  geom_jitter(aes(fill=variable),
-              position=position_jitterdodge(dodge.width = 0.9,),
-              shape=21,
-              alpha=0.3,
-              color="black")+
-  # geom_bar(data=tmp,aes(x=policy,y=value,fill=variable),
-  #          stat = "identity",
-  #          position = position_dodge(width = .9),
-  #          alpha=0.6,
-  #          vjust = 0.5 ,
-  #          color="black")+
-  geom_boxplot(outlier.shape = NA, alpha=0.5,position = position_dodge(width = .9))+
-  bbc_style()+
-  geom_hline(yintercept = 0, size = 0.5, colour="#333333") +
-  #scale_fill_manual(values = country_colors) +
-  geom_label(data=tmp_mean,
-             aes(x = policy, 
-                 y = 20,
-                 label = ifelse(mean>0,paste0("+",round(mean, digits=1),"%"),paste0(round(mean, digits=1),"%")),
-                 # label = paste0(
-                 # ifelse(median>0,paste0("+",round(median, digits=1),"%"),paste0(round(median, digits=1),"%")),
-                 #  "\n",
-                 #  "(",round(quartile25, digits=1),"% / ",round(quartile75, digits=1),"%)"
-                 # ),
-                 group=variable),
-             hjust = 0.5, 
-             vjust = 1, 
-             label.size = NA, 
-             fill=NA,
-             family="Helvetica", 
-             size = 5,
-             position = position_dodge(width = .9),
-             face="bold")+
-  bbc_style() +
-  facet_grid(rows=vars(variable),scales="free_y")+
-  #ylim(-25,10)+
-  scale_x_discrete(labels=c("All 4 policies\ncombined","Bus\nRapid\nTransit","Fuel\nTax","Fuel\nEfficiency","Urban\nGrowth\nBoundary","Welfare-\nincreasing\npolicies\nonly"))+
-  labs(title="Impact of each policy",
-       subtitle = "Global variation with respect to BAU scenario")+
-  theme(panel.spacing.y = unit(2,"line"),panel.border = element_rect(colour = "black", fill=NA, size=1))+
-  scale_y_continuous(labels = function(x) paste0(x, "%"))
-
-
-
-p#
-
-if (SAVE_ici) {
-  ggsave(paste0("./outputs/box_plot_policies_version3.png"),plot=p,
-         width = 2666/300,
-         height= 1875/300,
-         #height = 2666/300,
-         unit="in")
-}
-
-
-
-
-```

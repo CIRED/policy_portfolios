@@ -21,6 +21,7 @@ import seaborn as sns
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 
+os.chdir("..")
 from inputs.parameters import *
 from inputs.transport import *
 from inputs.data import *
@@ -94,8 +95,6 @@ for city in list(np.delete(sample_of_cities.index, 153)):
         sample_of_cities.loc[city, "criterion1"] = 0
         
 print("Number of cities excluded because of criterion 1:", sum(sample_of_cities.criterion1 == 0))
-
-sample_of_cities.to_excel("C:/Users/charl/OneDrive/Bureau/sample_cities.xlsx")
 
 # Exclusion criterion 2: real estate data consistent with income data
 def weighted_percentile(data, percents, weights=None):
@@ -300,6 +299,8 @@ df["emissions_2035_FE_BRT_UGB_var"][df["welfare_2035_FE_BRT_UGB_var"]<0] = np.na
 df["emissions_2035_CT_FE_BRT_UGB_var"][df["welfare_2035_CT_FE_BRT_UGB_var"]<0] = np.nan
 
 df = df.iloc[:,0:15]
+
+# TABLES S13 AND S15
 
 array_max = df.idxmin(axis=1)
 array_max = array_max.str.replace('_var', '')

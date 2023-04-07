@@ -97,27 +97,6 @@ for city in np.delete(np.unique(list_city.City), 153):
     size = rents_and_size.medSize
     if (city == 'Mashhad') |(city == 'Isfahan') | (city == 'Tehran'):
         rent = 100 * rent
-    if city == "Abidjan":
-        rent[size > 100] = np.nan
-        size[size > 100] = np.nan
-    if (city == "Casablanca") | (city == "Yerevan"):
-        rent[size > 100] = np.nan
-        size[size > 100] = np.nan
-    if city == "Toluca":
-        rent[size > 250] = np.nan
-        size[size > 250] = np.nan
-    if (city == "Manaus")| (city == "Rabat")| (city == "Sao_Paulo"):
-        rent[rent > 200] = np.nan
-        size[rent > 200] = np.nan
-    if (city == "Salvador"):
-        rent[rent > 250] = np.nan
-        size[rent > 250] = np.nan
-    if (city == "Karachi") | (city == "Lahore"):
-        rent[size > 200] = np.nan
-        size[size > 200] = np.nan
-    if city == "Addis_Ababa":
-        rent[rent > 400] = rent / 100
-        size = size / 10
     size.mask((size > 1000), inplace = True)
     agricultural_rent = import_agricultural_rent(path_folder, country)
     population = np.nansum(density)

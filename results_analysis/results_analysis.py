@@ -22,6 +22,7 @@ import seaborn as sns
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 
+os.chdir("..")
 from inputs.parameters import *
 from inputs.transport import *
 from inputs.data import *
@@ -35,19 +36,19 @@ from outputs.outputs import *
 path_data = "C:/Users/charl/OneDrive/Bureau/City_dataStudy/"
 path_folder = "C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Data/"
 path_calibration = "C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/final_results/calibration_20211124/"
-path_BAU = "C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/BAU_congestion2/" #BAU_20221221
+path_BAU = "C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/BAU_20221221/"
 
-path_CT = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/CT_cong/' #CT_20221221
-path_FE = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/FE_cong/' #FE_20221221
-path_UGB = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/UGB_cong/' #TOD_20221221
-path_BRT = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/BRT_cong/' #BRT_20221221
+path_CT = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/CT_20221221/' 
+path_FE = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/FE_20221221/' 
+path_UGB = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/TOD_20221221/' 
+path_BRT = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/BRT_20221221/' 
 
 #path_CT = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/CT_20221221/' #CT_20221221
 #path_FE = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/FE_20221221/' #FE_20221221
 #path_UGB = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/TOD_20221221/' #TOD_20221221
 #path_BRT = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/BRT_20221221/' #BRT_20221221
 
-path_CT_FE_BRT_UGB = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/all_cong/' #all_TOD_20221221
+path_CT_FE_BRT_UGB = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/all_TOD_20221221/' 
 
 #path_CT_FE = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/CT_FE_20221221/'
 #path_CT_BRT = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/CT_BRT_20221221/'
@@ -80,14 +81,13 @@ path_CT_FE_BRT_UGB = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_ch
 
 #path_CT_FE_BRT_UGB = 'C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/robustness_all_20230106/'
 
-
 # Work on the welfare-increasing scenario as well?
 welfare_increasing = False
 
 # Import list of cities
 list_city = list_of_cities_and_databases(path_data,'cityDatabase')
 
-### STEP 1: SAMPLE SELECTION (SUPP SECTION C)
+### STEP 1: SAMPLE SELECTION (SUPP SECTION C, TABLE S4)
 
 sample_of_cities = pd.DataFrame(columns = ['City', 'criterion1', 'criterion2', 'criterion3', 'final_sample'], index = np.unique(list_city.City))
 sample_of_cities.City = sample_of_cities.index
@@ -103,8 +103,6 @@ for city in list(np.delete(sample_of_cities.index, 153)):
         sample_of_cities.loc[city, "criterion1"] = 0
         
 print("Number of cities excluded because of criterion 1:", sum(sample_of_cities.criterion1 == 0))
-
-sample_of_cities.loc[sample_of_cities.final_sample == 1].to_excel("C:/Users/charl/OneDrive/Bureau/sample_cities.xlsx")
 
 # Exclusion criterion 2: real estate data consistent with income data
 def weighted_percentile(data, percents, weights=None):
@@ -129,27 +127,6 @@ for city in list(sample_of_cities.index):
     size = rents_and_size.medSize
     if (city == 'Mashhad') |(city == 'Isfahan') | (city == 'Tehran'):
         rent = 100 * rent
-    if city == "Abidjan":
-        rent[size > 100] = np.nan
-        size[size > 100] = np.nan
-    if (city == "Casablanca") | (city == "Yerevan"):
-        rent[size > 100] = np.nan
-        size[size > 100] = np.nan
-    if city == "Toluca":
-        rent[size > 250] = np.nan
-        size[size > 250] = np.nan
-    if (city == "Manaus")| (city == "Rabat")| (city == "Sao_Paulo"):
-        rent[rent > 200] = np.nan
-        size[rent > 200] = np.nan
-    if (city == "Salvador"):
-        rent[rent > 250] = np.nan
-        size[rent > 250] = np.nan
-    if (city == "Karachi") | (city == "Lahore"):
-        rent[size > 200] = np.nan
-        size[size > 200] = np.nan
-    if city == "Addis_Ababa":
-        rent[rent > 400] = rent / 100
-        size = size / 10
     size.mask((size > 1000), inplace = True)
     
     income = pd.read_excel(path_folder + "income.xlsx").income[pd.read_excel(path_folder + "income.xlsx").city == city].squeeze()   
@@ -193,7 +170,7 @@ print("Number of cities kept in the end:", sum(sample_of_cities.final_sample == 
 
 ### STEP 2: VALIDATION (SUPP SECTION A7)
 
-# Validation: calibrated parameters
+## CALIBRATED PARAMETERS
 calibrated_parameters = pd.DataFrame(columns = ['City', 'beta', 'b', 'kappa', 'Ro', 'sample_cities'], index = sample_of_cities.City[sample_of_cities.final_sample == 1])
 calibrated_parameters.City = calibrated_parameters.index
 
@@ -221,7 +198,7 @@ for param in ['beta', 'b', 'kappa', 'Ro']:
     plt.ylabel('Number of cities', size=14)
     ax.tick_params(axis = 'both', labelsize=14, color='#4f4e4e')
 
-# Validation: Modal shares
+## MODAL SHARES
 modal_shares_data = pd.DataFrame(columns = ['City', 'Simul_car', 'Simul_walking', 'Simul_transit'], index = list(sample_of_cities.City[(sample_of_cities.final_sample == 1)]))# | (sample_of_cities.criterion4 == 0)]))
 modal_shares_data.City = modal_shares_data.index
 
@@ -258,161 +235,50 @@ modal_shares_data["Total_walking"] = modal_shares_data["deloitte_walking"]
 modal_shares_data["Total_walking"][np.isnan(modal_shares_data["Total_walking"])] = modal_shares_data["c40_walking"]
 modal_shares_data["Total_walking"][np.isnan(modal_shares_data["Total_walking"])] = modal_shares_data["Epomm_walking"] + modal_shares_data["Epomm_cycling"]
 
-# Private cars - comparison with EPOMM data
-plt.figure(figsize = (15, 10))
-plt.rcParams.update({'font.size': 20})
-plt.scatter(modal_shares_data["Epomm_car"], modal_shares_data.Simul_car * 100, s = 200)
-plt.xlabel("Modal share of private car (EPOMM data - %)", size = 20)
-plt.ylabel("Modal share of private car (Simulations - %)", size = 20)
-plt.xlim(0, 100)
-plt.ylim(0, 100)
-for i in np.arange(len(modal_shares_data.index)):
-    plt.annotate(np.array(modal_shares_data.City)[i], (np.array(modal_shares_data["Epomm_car"])[i], np.array(modal_shares_data.Simul_car)[i] * 100), size = 20)
-print(sc.stats.pearsonr(np.array(modal_shares_data["Epomm_car"].astype(float)[~np.isnan(modal_shares_data["Epomm_car"].astype(float))]), np.array(100 * modal_shares_data.Simul_car)[~np.isnan(modal_shares_data["Epomm_car"].astype(float))]))
-print(sum(~np.isnan((modal_shares_data["Epomm_car"]).astype(float))))
+modal_shares_data.Simul_car = modal_shares_data.Simul_car * 100
+modal_shares_data.Simul_transit = modal_shares_data.Simul_transit * 100
+modal_shares_data.Simul_walking = modal_shares_data.Simul_walking * 100
+modal_shares_data["Epomm_walking"] = modal_shares_data["Epomm_cycling"] + modal_shares_data["Epomm_walking"]
 
-# Private cars - comparison with C40 data
-plt.figure(figsize = (15, 10))
-plt.rcParams.update({'font.size': 20})
-plt.scatter(modal_shares_data["c40_car"], modal_shares_data.Simul_car * 100, s = 200)
-plt.xlabel("Modal share of private car (C40 data - %)", size = 20)
-plt.ylabel("Modal share of private car (Simulations - %)", size = 20)
-plt.xlim(0, 100)
-plt.ylim(0, 100)
-print(sc.stats.pearsonr(np.array(modal_shares_data["c40_car"].astype(float)[~np.isnan(modal_shares_data["c40_car"].astype(float))]), np.array(100 * modal_shares_data.Simul_car)[~np.isnan(modal_shares_data["c40_car"].astype(float))]))
-print(sum(~np.isnan((modal_shares_data["c40_car"]).astype(float))))
+def validation_modal_shares(var1, var2):
+    plt.figure(figsize = (15, 10))
+    plt.rcParams.update({'font.size': 20})
+    plt.scatter(modal_shares_data[var1], modal_shares_data[var2], s = 200)
+    plt.xlabel(var1, size = 20)
+    plt.ylabel(var2, size = 20)
+    plt.xlim(0, 100)
+    plt.ylim(0, 100)
+    for i in np.arange(len(modal_shares_data.index)):
+        plt.annotate(np.array(modal_shares_data.City)[i], (np.array(modal_shares_data[var1])[i], np.array(modal_shares_data[var2])[i]), size = 20)
+    plt.show()
+    print("Correlation coeff between ", var1, " and ", var2, " :", sc.stats.pearsonr(np.array(modal_shares_data[var1].astype(float)[~np.isnan(modal_shares_data[var1].astype(float))]), np.array(100 * modal_shares_data[var2])[~np.isnan(modal_shares_data[var1].astype(float))]))
+    print("N: ", sum(~np.isnan((modal_shares_data[var1]).astype(float))))
 
-# Private cars - comparison with Deloitte data
-plt.figure(figsize = (15, 10))
-plt.rcParams.update({'font.size': 20})
-plt.scatter(modal_shares_data["deloitte_car"], modal_shares_data.Simul_car * 100, s = 200)
-plt.xlabel("Modal share of private car (Deloitte data - %)", size = 20)
-plt.ylabel("Modal share of private car (Simulations - %)", size = 20)
-plt.xlim(0, 100)
-plt.ylim(0, 100)
-print(sc.stats.pearsonr(np.array(modal_shares_data["deloitte_car"].astype(float)[~np.isnan(modal_shares_data["deloitte_car"].astype(float))]), np.array(100 * modal_shares_data.Simul_car)[~np.isnan(modal_shares_data["deloitte_car"].astype(float))]))
-print(sum(~np.isnan((modal_shares_data["deloitte_car"]).astype(float))))
+# TABLE S2
 
-# Private cars - comparison with all data
-plt.figure(figsize = (15, 10))
-plt.rcParams.update({'font.size': 20})
-plt.scatter(modal_shares_data["Total_car"], modal_shares_data.Simul_car * 100, s = 200)
-plt.xlabel("Modal share of private car (Data - %)", size = 20)
-plt.ylabel("Modal share of private car (Simulations - %)", size = 20)
-plt.plot([0,100],[0,100])
-plt.xlim(0, 100)
-plt.ylim(0, 100)
-for i in np.arange(len(modal_shares_data.index)):
-    plt.annotate(np.array(modal_shares_data.City)[i], (np.array(modal_shares_data["Total_car"])[i], np.array(modal_shares_data.Simul_car)[i] * 100), size = 20)
+# Comparison between our results and modal shares data - Private cars
+validation_modal_shares("Epomm_car", "Simul_car")
+validation_modal_shares("c40_car", "Simul_car")
+validation_modal_shares("deloitte_car", "Simul_car")
+validation_modal_shares("Total_car", "Simul_car")
 
-print(sc.stats.pearsonr(np.array(modal_shares_data["Total_car"].astype(float)[~np.isnan(modal_shares_data["Total_car"].astype(float))]), np.array(100 * modal_shares_data.Simul_car)[~np.isnan(modal_shares_data["Total_car"].astype(float))]))
-print(sum(~np.isnan((modal_shares_data["Total_car"]).astype(float))))
+# Comparison between our results and modal shares data - Public transports
+validation_modal_shares("Epomm_transit", "Simul_transit")
+validation_modal_shares("c40_transit", "Simul_transit")
+validation_modal_shares("deloitte_transit", "Simul_transit")
+validation_modal_shares("Total_transit", "Simul_transit")
 
-# Public transport - comparison with EPOMM data
-plt.figure(figsize = (15, 10))
-plt.rcParams.update({'font.size': 20})
-plt.scatter(modal_shares_data["Epomm_transit"], modal_shares_data.Simul_transit * 100, s = 200)
-plt.xlabel("Modal share of public transport (EPOMM data - %)", size = 20)
-plt.ylabel("Modal share of public transport (Simulations - %)", size = 20)
-plt.xlim(0, 100)
-plt.ylim(0, 100)
-for i in np.arange(len(modal_shares_data.index)):
-    plt.annotate(np.array(modal_shares_data.City)[i], (np.array(modal_shares_data["Epomm_transit"])[i], np.array(modal_shares_data.Simul_transit)[i] * 100), size = 20)
-print(sc.stats.pearsonr(np.array(modal_shares_data["Epomm_transit"].astype(float)[~np.isnan(modal_shares_data["Epomm_transit"].astype(float))]), np.array(100 * modal_shares_data.Simul_transit)[~np.isnan(modal_shares_data["Epomm_transit"].astype(float))]))
-print(sum(~np.isnan((modal_shares_data["Epomm_transit"]).astype(float))))
-
-# Public transport - comparison with C40 data
-plt.figure(figsize = (15, 10))
-plt.rcParams.update({'font.size': 20})
-plt.scatter(modal_shares_data["c40_transit"], modal_shares_data.Simul_transit * 100, s = 200)
-plt.xlabel("Modal share of public transport (c40 data - %)", size = 20)
-plt.ylabel("Modal share of public transport (Simulations - %)", size = 20)
-plt.xlim(0, 100)
-plt.ylim(0, 100)
-print(sc.stats.pearsonr(np.array(modal_shares_data["c40_transit"].astype(float)[~np.isnan(modal_shares_data["c40_transit"].astype(float))]), np.array(100 * modal_shares_data.Simul_transit)[~np.isnan(modal_shares_data["c40_transit"].astype(float))]))
-print(sum(~np.isnan((modal_shares_data["c40_transit"]).astype(float))))
-
-# Public transport - comparison with Deloitte data
-plt.figure(figsize = (15, 10))
-plt.rcParams.update({'font.size': 20})
-plt.scatter(modal_shares_data["deloitte_transit"], modal_shares_data.Simul_transit * 100, s = 200)
-plt.xlabel("Modal share of public transport (Deloitte data - %)", size = 20)
-plt.ylabel("Modal share of public transport (Simulations - %)", size = 20)
-plt.xlim(0, 100)
-plt.ylim(0, 100)
-print(sc.stats.pearsonr(np.array(modal_shares_data["deloitte_transit"].astype(float)[~np.isnan(modal_shares_data["deloitte_transit"].astype(float))]), np.array(100 * modal_shares_data.Simul_transit)[~np.isnan(modal_shares_data["deloitte_transit"].astype(float))]))
-print(sum(~np.isnan((modal_shares_data["deloitte_transit"]).astype(float))))
-
-# Public transport - comparison with all data
-plt.figure(figsize = (15, 10))
-plt.rcParams.update({'font.size': 20})
-plt.scatter(modal_shares_data["Total_transit"], modal_shares_data.Simul_transit * 100, s = 200)
-plt.xlabel("Modal share of public transport (Data - %)", size = 20)
-plt.ylabel("Modal share of public transport (Simulations - %)", size = 20)
-plt.xlim(0, 100)
-plt.ylim(0, 100)
-plt.plot([0,100],[0,100])
-for i in np.arange(len(modal_shares_data.index)):
-    plt.annotate(np.array(modal_shares_data.City)[i], (np.array(modal_shares_data["Total_transit"])[i], np.array(modal_shares_data.Simul_transit)[i] * 100), size = 20)
-
-print(sc.stats.pearsonr(np.array(modal_shares_data["Total_transit"].astype(float)[~np.isnan(modal_shares_data["Total_transit"].astype(float))]), np.array(100 * modal_shares_data.Simul_transit)[~np.isnan(modal_shares_data["Total_transit"].astype(float))]))
-print(sum(~np.isnan((modal_shares_data["Total_transit"]).astype(float))))
-
-# Active modes - comparison with EPOMM data
-plt.figure(figsize = (15, 10))
-plt.rcParams.update({'font.size': 20})
-plt.scatter(modal_shares_data["Epomm_cycling"] + modal_shares_data["Epomm_walking"], modal_shares_data.Simul_walking * 100, s = 200)
-plt.xlabel("Modal share of active modes (EPOMM data - %)", size = 20)
-plt.ylabel("Modal share of active modes (Simulations - %)", size = 20)
-plt.xlim(0, 100)
-plt.ylim(0, 100)
-for i in np.arange(len(modal_shares_data.index)):
-    plt.annotate(np.array(modal_shares_data.City)[i], (np.array(modal_shares_data["Epomm_cycling"] + modal_shares_data["Epomm_walking"])[i], np.array(modal_shares_data.Simul_walking)[i] * 100), size = 20)
-print(sc.stats.pearsonr(np.array((modal_shares_data["Epomm_cycling"] + modal_shares_data["Epomm_walking"]).astype(float)[~np.isnan((modal_shares_data["Epomm_cycling"] + modal_shares_data["Epomm_walking"]).astype(float))]), np.array(100 * modal_shares_data.Simul_walking)[~np.isnan((modal_shares_data["Epomm_cycling"] + modal_shares_data["Epomm_walking"]).astype(float))]))
-print(sum(~np.isnan((modal_shares_data["Epomm_walking"]).astype(float))))
-
-# Active modes - comparison with C40 data
-plt.figure(figsize = (15, 10))
-plt.rcParams.update({'font.size': 20})
-plt.scatter(modal_shares_data["c40_walking"], modal_shares_data.Simul_walking * 100, s = 200)
-plt.xlabel("Modal share of active modes (C40 data - %)", size = 20)
-plt.ylabel("Modal share of active modes (Simulations - %)", size = 20)
-plt.xlim(0, 100)
-plt.ylim(0, 100)
-print(sc.stats.pearsonr(np.array(modal_shares_data["c40_walking"].astype(float)[~np.isnan((modal_shares_data["c40_walking"]).astype(float))]), np.array(100 * modal_shares_data.Simul_walking)[~np.isnan((modal_shares_data["c40_walking"]).astype(float))]))
-print(sum(~np.isnan((modal_shares_data["c40_walking"]).astype(float))))
-
-# Active modes - comparison with dELOITTE data
-plt.figure(figsize = (15, 10))
-plt.rcParams.update({'font.size': 20})
-plt.scatter(modal_shares_data["deloitte_walking"], modal_shares_data.Simul_walking * 100, s = 200)
-plt.xlabel("Modal share of active modes (Deloitte data - %)", size = 20)
-plt.ylabel("Modal share of active modes (Simulations - %)", size = 20)
-plt.xlim(0, 100)
-plt.ylim(0, 100)
-print(sc.stats.pearsonr(np.array(modal_shares_data["deloitte_walking"].astype(float)[~np.isnan((modal_shares_data["deloitte_walking"]).astype(float))]), np.array(100 * modal_shares_data.Simul_walking)[~np.isnan((modal_shares_data["deloitte_walking"]).astype(float))]))
-print(sum(~np.isnan((modal_shares_data["deloitte_walking"]).astype(float))))
-
-# Active modes - comparison with all data
-plt.figure(figsize = (15, 10))
-plt.rcParams.update({'font.size': 20})
-plt.scatter(modal_shares_data["Total_walking"], modal_shares_data.Simul_walking * 100, s = 200)
-plt.xlabel("Modal share of active modes (Data - %)", size = 20)
-plt.ylabel("Modal share of active modes (Simulations - %)", size = 20)
-plt.xlim(0, 60)
-plt.ylim(0, 14)
-for i in np.arange(len(modal_shares_data.index)):
-    plt.annotate(np.array(modal_shares_data.City)[i], (np.array(modal_shares_data["Total_walking"])[i], np.array(modal_shares_data.Simul_walking)[i] * 100), size = 20)
-
-print(sc.stats.pearsonr(np.array(modal_shares_data["Total_walking"].astype(float)[~np.isnan((modal_shares_data["Total_walking"]).astype(float))]), np.array(100 * modal_shares_data.Simul_walking)[~np.isnan((modal_shares_data["Total_walking"]).astype(float))]))
-print(sum(~np.isnan((modal_shares_data["Total_walking"]).astype(float))))
+# Comparison between our results and modal shares data - Active modes
+validation_modal_shares("Epomm_walking", "Simul_walking")
+validation_modal_shares("c40_walking", "Simul_walking")
+validation_modal_shares("deloitte_walking", "Simul_walking")
+validation_modal_shares("Total_walking", "Simul_walking")
 
 modal_shares_data = modal_shares_data.merge(sample_of_cities.loc[:, ['City']])
+print(modal_shares_data.City[(modal_shares_data["Total_transit"].astype(float) > 30) & (modal_shares_data.Simul_transit < 15)])
+print(modal_shares_data.City[(modal_shares_data["Total_transit"].astype(float) > 20) & (modal_shares_data.Simul_transit < 10)])
 
-print(modal_shares_data.City[(modal_shares_data["Total_transit"].astype(float) > 30) & (100 * modal_shares_data.Simul_transit < 15)])
-print(modal_shares_data.City[(modal_shares_data["Total_transit"].astype(float) > 20) & (100 * modal_shares_data.Simul_transit < 10)])
-
-# Validation: emissions
+## EMISSIONS
 df_emissions = pd.DataFrame(columns = ['City', 'Simul_emissions'], index = list(sample_of_cities.City[sample_of_cities.final_sample == 1]))
 df_emissions.City = df_emissions.index
 
@@ -420,31 +286,33 @@ for city in df_emissions.index:
     df_emissions.Simul_emissions[df_emissions.City == city] = np.load(path_BAU + city + "_emissions_per_capita.npy")[0]
 
 # Data from Nangini et al.
-felix_data = pd.read_excel(path_folder + "emissions_databases/datapaper felix/DATA/D_FINAL.xlsx", header = 0)
-felix_data_for_comparison = felix_data.loc[:, ["City name", "Scope-1 GHG emissions [tCO2 or tCO2-eq]", "Scope-2 (CDP) [tCO2-eq]", "Population (CDP)"]]
-felix_data_for_comparison["City name"][felix_data_for_comparison["City name"] == "Addis Ababa"] = "Addis_Ababa"
-felix_data_for_comparison["City name"][felix_data_for_comparison["City name"] == "Belo Horizonte"] = "Belo_Horizonte"
-felix_data_for_comparison["City name"][felix_data_for_comparison["City name"] == "Bogotá"] = "Bogota"
-felix_data_for_comparison["City name"][felix_data_for_comparison["City name"] == "Brasília"] = "Brasilia"
-felix_data_for_comparison["City name"][felix_data_for_comparison["City name"] == "Buenos Aires"] = "Buenos_Aires"
-felix_data_for_comparison["City name"][felix_data_for_comparison["City name"] == "Cape Town"] = "Cape_Town"
-felix_data_for_comparison["City name"][felix_data_for_comparison["City name"] == "Goiânia"] = "Goiania"
-felix_data_for_comparison["City name"][felix_data_for_comparison["City name"] == "Greater London"] = "London"
-felix_data_for_comparison["City name"][felix_data_for_comparison["City name"] == "Hong Kong"] = "Hong_Kong"
-felix_data_for_comparison["City name"][felix_data_for_comparison["City name"] == "Jinan, Shandong"] = "Jinan"
-felix_data_for_comparison["City name"][felix_data_for_comparison["City name"] == "Los Angeles"] = "Los_Angeles"
-felix_data_for_comparison["City name"][felix_data_for_comparison["City name"] == "Mexico City"] = "Mexico_City"
-felix_data_for_comparison["City name"][felix_data_for_comparison["City name"] == "New York City"] = "New_York"
-felix_data_for_comparison["City name"][felix_data_for_comparison["City name"] == "Porto Alegre"] = "Porto_Alegre"
-felix_data_for_comparison["City name"][felix_data_for_comparison["City name"] == "Rio de Janeiro"] = "Rio_de_Janeiro"
-felix_data_for_comparison["City name"][felix_data_for_comparison["City name"] == "San Francisco"] = "San_Fransisco"
-felix_data_for_comparison["City name"][felix_data_for_comparison["City name"] == "San Diego"] = "San_Diego"
-felix_data_for_comparison["City name"][felix_data_for_comparison["City name"] == "Sao Paulo"] = "Sao_Paulo"
-felix_data_for_comparison["City name"][felix_data_for_comparison["City name"] == "Toluca de Lerdo"] = "Toluca"
-felix_data_for_comparison["City name"][felix_data_for_comparison["City name"] == "Zürich"] = "Zurich"
-felix_data_for_comparison["felix_scope1"] = felix_data_for_comparison["Scope-1 GHG emissions [tCO2 or tCO2-eq]"] / felix_data_for_comparison["Population (CDP)"]
-felix_data_for_comparison["felix_scope2"] = felix_data_for_comparison["Scope-2 (CDP) [tCO2-eq]"] / felix_data_for_comparison["Population (CDP)"]
-felix_data_for_comparison = felix_data_for_comparison.loc[:, ['City name', "felix_scope1", "felix_scope2"]]
+nangini_data = pd.read_excel(path_folder + "emissions_databases/datapaper felix/DATA/D_FINAL.xlsx", header = 0)
+nangini_data_for_comparison = nangini_data.loc[:, ["City name", "Scope-1 GHG emissions [tCO2 or tCO2-eq]", "Scope-2 (CDP) [tCO2-eq]", "Population (CDP)"]]
+nangini_data_for_comparison["City name"][nangini_data_for_comparison["City name"] == "Addis Ababa"] = "Addis_Ababa"
+nangini_data_for_comparison["City name"][nangini_data_for_comparison["City name"] == "Belo Horizonte"] = "Belo_Horizonte"
+nangini_data_for_comparison["City name"][nangini_data_for_comparison["City name"] == "Bogotá"] = "Bogota"
+nangini_data_for_comparison["City name"][nangini_data_for_comparison["City name"] == "Brasília"] = "Brasilia"
+nangini_data_for_comparison["City name"][nangini_data_for_comparison["City name"] == "Buenos Aires"] = "Buenos_Aires"
+nangini_data_for_comparison["City name"][nangini_data_for_comparison["City name"] == "Cape Town"] = "Cape_Town"
+nangini_data_for_comparison["City name"][nangini_data_for_comparison["City name"] == "Goiânia"] = "Goiania"
+nangini_data_for_comparison["City name"][nangini_data_for_comparison["City name"] == "Greater London"] = "London"
+nangini_data_for_comparison["City name"][nangini_data_for_comparison["City name"] == "Hong Kong"] = "Hong_Kong"
+nangini_data_for_comparison["City name"][nangini_data_for_comparison["City name"] == "Jinan, Shandong"] = "Jinan"
+nangini_data_for_comparison["City name"][nangini_data_for_comparison["City name"] == "Los Angeles"] = "Los_Angeles"
+nangini_data_for_comparison["City name"][nangini_data_for_comparison["City name"] == "Mexico City"] = "Mexico_City"
+nangini_data_for_comparison["City name"][nangini_data_for_comparison["City name"] == "New York City"] = "New_York"
+nangini_data_for_comparison["City name"][nangini_data_for_comparison["City name"] == "Porto Alegre"] = "Porto_Alegre"
+nangini_data_for_comparison["City name"][nangini_data_for_comparison["City name"] == "Rio de Janeiro"] = "Rio_de_Janeiro"
+nangini_data_for_comparison["City name"][nangini_data_for_comparison["City name"] == "San Francisco"] = "San_Fransisco"
+nangini_data_for_comparison["City name"][nangini_data_for_comparison["City name"] == "San Diego"] = "San_Diego"
+nangini_data_for_comparison["City name"][nangini_data_for_comparison["City name"] == "Sao Paulo"] = "Sao_Paulo"
+nangini_data_for_comparison["City name"][nangini_data_for_comparison["City name"] == "Toluca de Lerdo"] = "Toluca"
+nangini_data_for_comparison["City name"][nangini_data_for_comparison["City name"] == "Zürich"] = "Zurich"
+nangini_data_for_comparison["nangini_scope1"] = nangini_data_for_comparison["Scope-1 GHG emissions [tCO2 or tCO2-eq]"] / nangini_data_for_comparison["Population (CDP)"]
+nangini_data_for_comparison["nangini_scope2"] = nangini_data_for_comparison[
+    "Scope-2 (CDP) [tCO2-eq]"] / nangini_data_for_comparison["Population (CDP)"]
+nangini_data_for_comparison = nangini_data_for_comparison.loc[:, [
+    'City name', "nangini_scope1", "nangini_scope2"]]
 
 # Data from Moran et al.
 erl_data = pd.read_excel(path_folder + "emissions_databases/ERL/ERL_13_064041_SD_Moran Spatial Footprints Data Appendix.xlsx", header = 0, sheet_name = 'S.2.3a - Top 500 Cities')
@@ -508,16 +376,16 @@ direct_emissions_data.columns = ['com_direct_emissions', 'city']
 indirect_emissions_data.columns = ['com_indirect_emissions', 'city']
 
 # Merge our simulations with the data on emissions
-df_emissions = df_emissions.merge(felix_data_for_comparison, left_on = 'City', right_on = 'City name', how = 'left')
+df_emissions = df_emissions.merge(nangini_data_for_comparison, left_on = 'City', right_on = 'City name', how = 'left')
 df_emissions = df_emissions.merge(erl_data, left_on = 'City', right_on = 'city', how = 'left')
 df_emissions = df_emissions.merge(erl_data2, left_on = 'City', right_on = 'city', how = 'left')
 df_emissions = df_emissions.merge(direct_emissions_data, left_on = 'City', right_on = 'city', how = 'left')
 df_emissions = df_emissions.merge(indirect_emissions_data, left_on = 'City', right_on = 'city', how = 'left')
 df_emissions.erl_emissions[np.isnan(df_emissions.erl_emissions)] = df_emissions.erl_emissions2[np.isnan(df_emissions.erl_emissions)]
-df_emissions.loc[df_emissions.felix_scope1>20, 'felix_scope1'] = np.nan
+df_emissions.loc[df_emissions.nangini_scope1>20, 'nangini_scope1'] = np.nan
 
-# Comparispn
-for var in ['felix_scope1', 'felix_scope2', 'erl_emissions', 'erl_emissions2', 'com_direct_emissions','com_indirect_emissions']:
+# TABLE S3
+for var in ['nangini_scope1', 'nangini_scope2', 'erl_emissions', 'erl_emissions2', 'com_direct_emissions','com_indirect_emissions']:
     plt.figure(figsize = (15, 10))
     plt.rcParams.update({'font.size': 20})
     plt.scatter(df_emissions['Simul_emissions'], df_emissions[var], s = 200)
@@ -526,18 +394,14 @@ for var in ['felix_scope1', 'felix_scope2', 'erl_emissions', 'erl_emissions2', '
     print(sc.stats.pearsonr(np.array(df_emissions[var].astype(float)[~np.isnan(df_emissions[var].astype(float))]), np.array(df_emissions.Simul_emissions)[~np.isnan(df_emissions[var].astype(float))]))
     print(len((np.array(df_emissions[var].astype(float)[~np.isnan(df_emissions[var].astype(float))]))))
 
-plt.figure(figsize = (15, 10))
-plt.rcParams.update({'font.size': 20})
-plt.scatter(df_emissions['Simul_emissions'], df_emissions['felix_scope1'], s = 200)
+print(sc.stats.pearsonr(np.array(df_emissions["nangini_scope1"].astype(float)[~np.isnan((df_emissions["nangini_scope2"]).astype(float)) & ~np.isnan((df_emissions["nangini_scope1"]).astype(float))]), np.array(df_emissions.felix_scope2)[~np.isnan((df_emissions["nangini_scope2"]).astype(float)) & ~np.isnan((df_emissions["nangini_scope1"]).astype(float))]))
+print(sc.stats.pearsonr(np.array(df_emissions["Simul_emissions"].astype(float)[~np.isnan((df_emissions["nangini_scope2"]).astype(float)) & ~np.isnan((df_emissions["nangini_scope2"]).astype(float))]), np.array(df_emissions.felix_scope2)[~np.isnan((df_emissions["nangini_scope2"]).astype(float)) & ~np.isnan((df_emissions["nangini_scope2"]).astype(float))]))
+print(sc.stats.pearsonr(np.array(df_emissions["Simul_emissions"].astype(float)[~np.isnan((df_emissions["nangini_scope1"]).astype(float)) & ~np.isnan((df_emissions["nangini_scope1"]).astype(float))]), np.array(df_emissions.felix_scope1)[~np.isnan((df_emissions["nangini_scope1"]).astype(float)) & ~np.isnan((df_emissions["nangini_scope1"]).astype(float))]))
 
-print(sc.stats.pearsonr(np.array(df_emissions["felix_scope1"].astype(float)[~np.isnan((df_emissions["felix_scope2"]).astype(float)) & ~np.isnan((df_emissions["felix_scope1"]).astype(float))]), np.array(df_emissions.felix_scope2)[~np.isnan((df_emissions["felix_scope2"]).astype(float)) & ~np.isnan((df_emissions["felix_scope1"]).astype(float))]))
-print(sc.stats.pearsonr(np.array(df_emissions["Simul_emissions"].astype(float)[~np.isnan((df_emissions["felix_scope2"]).astype(float)) & ~np.isnan((df_emissions["felix_scope2"]).astype(float))]), np.array(df_emissions.felix_scope2)[~np.isnan((df_emissions["felix_scope2"]).astype(float)) & ~np.isnan((df_emissions["felix_scope2"]).astype(float))]))
-print(sc.stats.pearsonr(np.array(df_emissions["Simul_emissions"].astype(float)[~np.isnan((df_emissions["felix_scope1"]).astype(float)) & ~np.isnan((df_emissions["felix_scope1"]).astype(float))]), np.array(df_emissions.felix_scope1)[~np.isnan((df_emissions["felix_scope1"]).astype(float)) & ~np.isnan((df_emissions["felix_scope1"]).astype(float))]))
+sum(~np.isnan((df_emissions["nangini_scope2"]).astype(float)))
+sum(~np.isnan((df_emissions["nangini_scope1"]).astype(float)))
 
-sum(~np.isnan((df_emissions["felix_scope2"]).astype(float)))
-sum(~np.isnan((df_emissions["felix_scope1"]).astype(float)))
-
-# Validation: densities, rents, dwelling sizes
+## DENSITIES, RENTS, DWELLING SIZE
 r2density_scells2 = np.load(path_calibration + "r2density_scells2.npy", allow_pickle = True)
 r2density_scells2 = np.array(r2density_scells2, ndmin = 1)[0]
 r2rent_scells2 = np.load(path_calibration + "r2rent_scells2.npy", allow_pickle = True)
@@ -589,9 +453,9 @@ validation.loc[validation.City == "Brisbane", "corrrdensity"] = 0.55
 validation.loc[validation.City == "Los_Angeles", "corrrent"] = 0.48
 validation.loc[validation.City == "Athens", "corrrent"] = 0.21
 validation.loc[validation.City == "Brisbane", "corrrent"] = 0.04
-              
+
+# TABLE S1              
 table_validation = validation[validation.final_sample == 1].describe()
-#validation[validation.final_sample == 1].to_excel('C:/Users/charl/OneDrive/Bureau/table_validation.xlsx')
 
 ### STEP 3: BAU
 
@@ -625,6 +489,8 @@ color_tab = {'North_America':'red', 'Europe':'green', 'Asia':'blue', 'Oceania':'
 
 BAU_scenario["var_emissions"] = 100 *(BAU_scenario["emissions_2035"] - BAU_scenario["emissions_2015"]) / BAU_scenario["emissions_2015"]
 
+# FIGURE S6
+
 plt.rcParams['figure.dpi'] = 360
 sns.set(style="whitegrid")
 fig, ax = plt.subplots(figsize=(6,4))
@@ -644,7 +510,7 @@ plt.legend([],[], frameon=False)
 ax.tick_params(axis = 'both', labelsize=14, color='#4f4e4e')
 plt.savefig('bau2.png')
 
-#STEP 4: RESULTS
+### STEP 4: RESULTS
 
 df = pd.DataFrame(columns = ['City', 'emissions_2035_BAU', 'welfare_with_cobenefits_2035_BAU', 'welfare_without_cobenefits_2035_BAU', 'emissions_2035_BRT', 'welfare_with_cobenefits_2035_BRT', 'welfare_without_cobenefits_2035_BRT', 'emissions_2035_FE', 'welfare_with_cobenefits_2035_FE', 'welfare_without_cobenefits_2035_FE', 'emissions_2035_UGB', 'welfare_with_cobenefits_2035_UGB', 'welfare_without_cobenefits_2035_UGB', 'emissions_2035_CT', 'welfare_with_cobenefits_2035_CT', 'welfare_without_cobenefits_2035_CT',
                              'emissions_2035_all', 'welfare_with_cobenefits_2035_all', 'welfare_without_cobenefits_2035_all', 'emissions_2035_all_welfare_increasing', 'welfare_with_cobenefits_2035_all_welfare_increasing', 'welfare_without_cobenefits_2035_all_welfare_increasing', 'avg_dist_city_center_CT', 'modal_share_cars_CT', 'avg_dist_city_center_FE', 'modal_share_cars_FE', 'avg_dist_city_center_BRT', 'modal_share_cars_BRT', 'avg_dist_city_center_UGB', 'modal_share_cars_UGB', 'avg_dist_city_center_BAU', 'modal_share_cars_BAU', 'avg_dist_city_center_all', 'modal_share_cars_all', 'avg_dist_city_center_all_welfare_increasing', 'modal_share_cars_all_welfare_increasing', 'modal_share_cars_0', 'modal_share_pt_0', 'population_2035',
@@ -665,6 +531,7 @@ df = pd.DataFrame(columns = ['City', 'emissions_2035_BAU', 'welfare_with_cobenef
 df.City = df.index
 df["city"] = df.index
 
+#results_analysis/welfare_increasing_portfolio.py first
 array_welfare_increasing = pd.read_excel("C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/robustness_welfare_increasing_policies.xlsx", index_col = 0)
 
 array_welfare_increasing.value_counts()
@@ -873,7 +740,8 @@ if welfare_increasing == True:
 
     
 #df.to_excel('C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/robustness_20230106.xlsx')
-df.to_excel('C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/test_cong.xlsx')
+
+# TABLES S7, S8, S9, S10, S11, S12 AND FIGURE S10
 
 df["Population"] = np.nan
 for city in df.City:
@@ -886,189 +754,17 @@ city_continent = city_continent.sort_values('City')
 df = df.merge(city_continent, on = "City", how = 'left')
 color_tab = {'North_America':'red', 'Europe':'green', 'Asia':'blue', 'Oceania':'yellow', 'South_America': 'brown', 'Africa': 'orange'}
 
-# Health analysis
-new_df = pd.DataFrame(index = ['CT', 'FE', 'BRT', 'UGB'], columns = ['active_modes', 'air_pollution', 'car_accidents', 'noise'])    
-for i in new_df.columns:
-    for j in new_df.index:
-        new_df.loc[j,i] = np.average(np.array(df['var_'+i+'_'+j][~np.isnan(df['var_'+i+'_'+j])].astype(float)), weights = np.array(df.Population.astype(float))[~np.isnan(df['var_'+i+'_'+j])])
-
-fig, ax = plt.subplots(1,1, figsize = (10,6))
-label =  ['Fuel \n Tax', 'Fuel \n Efficiency', 'Bus Rapid \n Transit', 'Urban Growth \n Boundary']
-x = np.arange(len(label))
-width = 0.2
-rect1 = ax.bar(x - 0.4,
-              new_df['active_modes'],
-              width = width, 
-               label = 'Active modes',
-               edgecolor = "black"
-              )
-rect2 = ax.bar(x -0.2,
-              new_df['air_pollution'],
-              width = width,
-              label = 'Air pollution',
-              edgecolor = "black")
-rect3 = ax.bar(x,
-              new_df['car_accidents'],
-              width = width,
-              label = 'Car accidents',
-              edgecolor = "black")
-rect4 = ax.bar(x+0.2,
-              new_df['noise'],
-              width = width,
-              label = 'Noise',
-              edgecolor = "black")
-ax.set_ylabel("Variations (%)",
-              fontsize = 20,
-              labelpad = 20)
-ax.set_xticks(x)
-ax.set_xticklabels(label,
-                   fontsize = 20)
-ax.legend(fontsize = 16)
-
-# Income analysis
-new_df = pd.DataFrame(index = ['CT', 'BRT', 'all', 'all_welfare_increasing'], columns = ['disp_income'])    
-for i in new_df.columns:
-    for j in new_df.index:
-        new_df.loc[j,i] = np.average(np.array(df['var_'+i+'_'+j][~np.isnan(df['var_'+i+'_'+j])].astype(float)), weights = np.array(df.Population.astype(float))[~np.isnan(df['var_'+i+'_'+j])])
-
-fig, ax = plt.subplots(1,1, figsize = (10,6))
-label =  ['CT', 'BRT', 'all', 'all_welfare_increasing']
-x = np.arange(len(label))
-width = 0.5
-rect1 = ax.bar(x,
-              new_df['disp_income'],
-              width = width, 
-               label = 'disp_income modes',
-               edgecolor = "black"
-              )
-ax.set_ylabel("Variations (%)",
-              fontsize = 20,
-              labelpad = 20)
-ax.set_xticks(x)
-ax.set_xticklabels(label,
-                   fontsize = 20)
-ax.legend(fontsize = 16)
-
-# Plot the impact of the policies on rents, dwelling sizes, transportation costs, and health cobenefits
-new_df = pd.DataFrame(index = ['CT', 'FE', 'BRT', 'UGB'], columns = ['rent', 'health', 'housing', 'tcost'])    
-for i in new_df.columns:
-    for j in new_df.index:
-        new_df.loc[j,i] = np.average(np.array(df['var_'+i+'_'+j].astype(float)), weights = np.array(df.Population.astype(float)))
-
-fig, ax = plt.subplots(1,1, figsize = (10,6))
-label =  ['Fuel \n Tax', 'Fuel \n Efficiency', 'Bus Rapid \n Transit', 'Urban Growth \n Boundary']
-x = np.arange(len(label))
-width = 0.2
-rect1 = ax.bar(x - 0.4,
-              new_df['rent'],
-              width = width, 
-               label = 'Avg. rent per m2',
-               edgecolor = "black"
-              )
-rect2 = ax.bar(x -0.2,
-              new_df['health'],
-              width = width,
-              label = 'Avg. health cobenefits',
-              edgecolor = "black")
-rect3 = ax.bar(x,
-              new_df['housing'],
-              width = width,
-              label = 'Avg. dwelling sizes',
-              edgecolor = "black")
-rect4 = ax.bar(x+0.2,
-              new_df['tcost'],
-              width = width,
-              label = 'Avg. transportation costs',
-              edgecolor = "black")
-ax.set_ylabel("Variations (%)",
-              fontsize = 20,
-              labelpad = 20)
-ax.set_xticks(x)
-ax.set_xticklabels(label,
-                   fontsize = 20)
-ax.legend(fontsize = 16)
-ax.grid()
-
-# Plot the impact on emissions and welfare
-if welfare_increasing == True:
-    data = pd.DataFrame(columns = ['policy', 'Average emissions'])
-    data['policy'] = ["Fuel tax", "BRT", "Fuel efficiency", "UGB", "all", "welfare_increasing"]
-    data['Average emissions'] = [np.nansum(df.emissions_2035_CT_var * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.emissions_2035_BRT_var * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.emissions_2035_FE_var * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.emissions_2035_UGB_var * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.emissions_2035_all_var * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.emissions_2035_all_welfare_increasing_var * df.population_2035) / np.nansum(df.population_2035)]
-    data['Average welfare'] = [np.nansum(df.welfare_2035_CT_var * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.welfare_2035_BRT_var * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.welfare_2035_FE_var * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.welfare_2035_UGB_var * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.welfare_2035_all_var * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.welfare_2035_all_welfare_increasing_var * df.population_2035) / np.nansum(df.population_2035)]
-    data['Average welfare without cobenefits'] = [np.nansum(df.welfare_2035_CT_var_without * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.welfare_2035_BRT_var_without * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.welfare_2035_FE_var_without * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.welfare_2035_UGB_var_without * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.welfare_2035_all_var_without * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.welfare_2035_all_welfare_increasing_var_without * df.population_2035) / np.nansum(df.population_2035)]
-else:
-    data = pd.DataFrame(columns = ['policy', 'Average emissions'])
-    data['policy'] = ["Fuel tax", "BRT", "Fuel efficiency", "UGB", "all"]
-    data['Average emissions'] = [np.nansum(df.emissions_2035_CT_var * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.emissions_2035_BRT_var * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.emissions_2035_FE_var * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.emissions_2035_UGB_var * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.emissions_2035_all_var * df.population_2035) / np.nansum(df.population_2035)]
-    data['Average welfare'] = [np.nansum(df.welfare_2035_CT_var * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.welfare_2035_BRT_var * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.welfare_2035_FE_var * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.welfare_2035_UGB_var * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.welfare_2035_all_var * df.population_2035) / np.nansum(df.population_2035)]
-    data['Average welfare without cobenefits'] = [np.nansum(df.welfare_2035_CT_var_without * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.welfare_2035_BRT_var_without * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.welfare_2035_FE_var_without * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.welfare_2035_UGB_var_without * df.population_2035) / np.nansum(df.population_2035), np.nansum(df.welfare_2035_all_var_without * df.population_2035) / np.nansum(df.population_2035)]
-    
-tidy = data.melt(id_vars='policy').rename(columns=str.title)
-#tidy = tidy[0:12]
-tidy = tidy[0:10]
-plt.rcParams['figure.dpi'] = 360
-sns.set(style="whitegrid")
-fig, ax = plt.subplots(figsize=(12,4))
-sns.barplot(data=tidy, x="Policy", y="Value", hue = "Variable", palette=['#fc8d62', '#66c2a5', '#66c2a5'])#("Set2"))
-plt.xlabel('')
-plt.ylabel('')
-plt.yticks([], [])
-plt.xticks(ticks = np.arange(5), labels = ["Fuel Tax", "Bus Rapid Transit", "Fuel Efficiency", "Urban Growth Boundary", "All"])#, "All welfare-increasing"])
-handles, labels = ax.get_legend_handles_labels()
-ax.legend(handles=handles[0:], labels=["Total transport emissions", "Average welfare"], title = '', bbox_to_anchor=(0.65, 0.3), fontsize = 14, title_fontsize=14, loc=2, borderaxespad=0.)._legend_box.align = "left"
-ax.tick_params(axis = 'both', labelsize=14, color='#4f4e4e')
-sns.despine(left=True, top = True)
-plt.text(x=0.2, y=0.6, s='+' +str(round(data["Average welfare"][0], 1))+ "%", 
-                 color='black', fontsize=14, horizontalalignment='center')
-plt.text(x=1.2, y=0.6, s='+' +str(round(data["Average welfare"][1], 1))+ "%", 
-                 color='black', fontsize=14, horizontalalignment='center')
-plt.text(x=2.2, y=0.6, s='+' +str(round(data["Average welfare"][2], 1))+ "%", 
-                 color='black', fontsize=14, horizontalalignment='center')
-plt.text(x=3.2, y=-1, s=str(round(data["Average welfare"][3], 1))+ "%", 
-                 color='black', fontsize=14, horizontalalignment='center')
-plt.text(x=4.2, y=-1, s=str(round(data["Average welfare"][4], 1))+ "%", 
-                 color='black', fontsize=14, horizontalalignment='center')
-#plt.text(x=5.2, y=-1, s=str(round(data["Average welfare"][5], 1))+ "%", 
-#                          color='black', fontsize=14, horizontalalignment='center')
-plt.text(x=-0.2, y=-1, s=str(round(data["Average emissions"][0], 1))+ "%", 
-                 color='black', fontsize=14, horizontalalignment='center')
-plt.text(x=0.8, y=-1, s=str(round(data["Average emissions"][1], 1))+ "%", 
-                 color='black', fontsize=14, horizontalalignment='center')
-plt.text(x=1.8, y=-1, s=str(round(data["Average emissions"][2], 1))+ "%", 
-                 color='black', fontsize=14, horizontalalignment='center')
-plt.text(x=2.8, y=-1, s=str(round(data["Average emissions"][3], 1))+ "%", 
-                 color='black', fontsize=14, horizontalalignment='center')
-plt.text(x=3.8, y=-1, s=str(round(data["Average emissions"][4], 1))+ "%", 
-                 color='black', fontsize=14, horizontalalignment='center')
-#plt.text(x=4.8, y=-1, s=str(round(data["Average emissions"][5], 1))+ "%", 
-#                 color='black', fontsize=14, horizontalalignment='center')
-#plt.savefig('aggregated.png')
-
-
-# Regressions: emissions/welfare variations on city characteristics
 city_characteristics2 = pd.read_excel("C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/city_characteristics_20211027.xlsx")
 city_characteristics = pd.read_excel("C:/Users/charl/OneDrive/Bureau/mitigation_policies_city_characteristics/Sorties/city_characteristics_20210810.xlsx")
 df = df.merge(city_characteristics, on = 'city')
 df = df.merge(city_characteristics2.loc[:, ["city", "agricultural_rent"]], on = 'city')
-compute_density = pd.read_excel("C:/Users/charl/OneDrive/Bureau/Urban sprawl/Urban sprawl and density/scenarios_densities_20211115.xlsx")
-compute_density["data_density_2015"] = 0.01 * compute_density.data_pop_2015 / compute_density.ESA_land_cover_2015
-df = df.merge(compute_density, on = 'City')
+
+
 df["log_population"] = np.log(df.population)
 df["log_income"] = np.log(df.income)
-df["log_pop2035"] = np.log(df.pop_2035)
-df["log_inc2035"] = np.log(df.inc_2035)
 df["log_agri_rent"] = np.log(df.agricultural_rent)
-d_corr_density_scells2 = np.load(path_calibration + "d_corr_density_scells2.npy", allow_pickle = True)
-d_corr_density_scells2 = np.array(d_corr_density_scells2, ndmin = 1)[0]
-d_corr_rent_scells2 = np.load(path_calibration + "d_corr_rent_scells2.npy", allow_pickle = True)
-d_corr_rent_scells2 = np.array(d_corr_rent_scells2, ndmin = 1)[0]
 r2density_scells2 = np.load(path_calibration + "r2density_scells2.npy", allow_pickle = True)
 r2density_scells2 = np.array(r2density_scells2, ndmin = 1)[0]
-r2rent_scells2 = np.load(path_calibration + "r2rent_scells2.npy", allow_pickle = True)
-r2rent_scells2 = np.array(r2rent_scells2, ndmin = 1)[0]
-df["corr_rent"] = np.array(list(d_corr_rent_scells2.values()))[sample_of_cities.loc[sample_of_cities.City != 'Sfax', :].final_sample == 1, 0]
-df["corr_density"] = np.array(list(d_corr_density_scells2.values()))[sample_of_cities.loc[sample_of_cities.City != 'Sfax', :].final_sample == 1, 0]
-df["r2_rent"] = np.array(list(r2rent_scells2.values()))[sample_of_cities.loc[sample_of_cities.City != 'Sfax', :].final_sample == 1]
 df["r2_density"] = np.array(list(r2density_scells2.values()))[sample_of_cities.loc[sample_of_cities.City != 'Sfax', :].final_sample == 1]
 df["pop_growth"] = df.pop_2035 / df.population
 df["log_pop_growth"] = np.log(df.pop_growth)
@@ -1098,78 +794,9 @@ df["log_length_network"] = np.log(df.length_network)
 df["length_network2"] = df.length_network * df.length_network
 df["network_pop"] = df.length_network / df.population
 df["network_pop2"] = df["network_pop"] * df["network_pop"]
-df["diff_pop"] = df["pop_2035"] - df["population"]
-df["diff_inc"] = df["inc_2035"] - df["income"]
 
-informal_housing = import_informal_housing(list_city, path_folder)
-df = df.merge(informal_housing.loc[:, ["City", "informal_housing"]], left_on = "City", right_on = "City")
-#bus_rapid = df.loc[:, ["City", "Continent_y", "quartiles_BRT", "length_network", "network_pop", "substitution_potential", "modal_share_car"]]
-
-polycentricity = pd.read_excel(path_data + 'Article/Data_Criterias/CBD_Criterias_Table.ods', engine="odf")
-polycentricity = polycentricity.iloc[:, [2, 16]]
-polycentricity.columns = ['city', 'polycentricity_index']
-polycentricity.loc[polycentricity.city == "Addis Ababa", "city"] = "Addis_Ababa"
-polycentricity.loc[polycentricity.city == "Belo Horizonte", "city"] = "Belo_Horizonte"
-polycentricity.loc[polycentricity.city == "Buenos Aires", "city"] = "Buenos_Aires"
-polycentricity.loc[polycentricity.city == "Cape Town", "city"] = "Cape_Town"
-polycentricity.loc[polycentricity.city == "Chiang Mai", "city"] = "Chiang_Mai"
-polycentricity.loc[polycentricity.city == "Cluj-Napoca", "city"] = "Cluj_Napoca"
-polycentricity.loc[polycentricity.city == "Frankfurt am Main", "city"] = "Frankfurt_am_Main"
-polycentricity.loc[polycentricity.city == "Goiânia", "city"] = "Goiania"
-polycentricity.loc[polycentricity.city == "Hong Kong", "city"] = "Hong_Kong"
-polycentricity.loc[polycentricity.city == "Los Angeles", "city"] = "Los_Angeles"
-polycentricity.loc[polycentricity.city == "Malmö", "city"] = "Malmo"
-polycentricity.loc[polycentricity.city == "Mar del Plata", "city"] = "Mar_del_Plata"
-polycentricity.loc[polycentricity.city == "Mexico City", "city"] = "Mexico_City"
-polycentricity.loc[polycentricity.city == "New York", "city"] = "New_York"
-polycentricity.loc[polycentricity.city == "Nizhny Novgorod", "city"] = "Nizhny_Novgorod"
-polycentricity.loc[polycentricity.city == "Porto Alegre", "city"] = "Porto_Alegre"
-polycentricity.loc[polycentricity.city == "Rio de Janeiro", "city"] = "Rio_de_Janeiro"
-polycentricity.loc[polycentricity.city == "Rostov-on-Don", "city"] = "Rostov_on_Don"
-polycentricity.loc[polycentricity.city == "San Diego", "city"] = "San_Diego"
-polycentricity.loc[polycentricity.city == "San Fransisco", "city"] = "San_Fransisco"
-polycentricity.loc[polycentricity.city == "Sao Paulo", "city"] = "Sao_Paulo"
-polycentricity.loc[polycentricity.city == "St Petersburg", "city"] = "St_Petersburg"
-polycentricity.loc[polycentricity.city == "The Hague", "city"] = "The_Hague"
-polycentricity.loc[polycentricity.city == "Ulan Bator", "city"] = "Ulan_Bator"
-polycentricity.loc[polycentricity.city == "Washington DC", "city"] = "Washington_DC"
-polycentricity.loc[polycentricity.city == "Zürich", "city"] = "Zurich"
-df = df.merge(polycentricity.loc[:, ["city", "polycentricity_index"]], left_on = "City", right_on = "city")
-    
-second_step = pd.DataFrame(index = list_city.City, columns = ["spatial_data_cover", "market_data_cover"])
-
-for city in list(list_city.City):
-    
-    country = list_city.Country[list_city.City == city].iloc[0]
-    proj = str(int(list_city.GridEPSG[list_city.City == city].iloc[0]))
-    
-    #Population  
-    density = pd.read_csv(path_data + 'Data/' + country + '/' + city +
-                          '/Population_Density/grille_GHSL_density_2015_' +
-                          str.upper(city) + '.txt', sep = '\s+|,', engine='python')
-    density = density.loc[:,density.columns.str.startswith("density")]
-    density = np.array(density).squeeze()
-    
-    (country, proj, density, rents_and_size, land_use, land_cover_ESACCI, driving, transit, grille, 
-     centre, distance_cbd, conversion_rate) = import_data(list_city, path_data, city, path_folder)        
-    density = density.loc[:,density.columns.str.startswith("density")]
-    density = np.array(density).squeeze()
-    second_step.loc[second_step.index == city, "spatial_data_cover"] = sum(~np.isnan(rents_and_size.medRent)) / sum((pd.to_numeric(density)) > 0) 
-    second_step.loc[second_step.index == city, "market_data_cover"] = np.nansum(density) / np.nansum(rents_and_size.dataCount)
-    
-df = df.merge(second_step, left_on = "City", right_on = "City")
-
-df.market_data_cover = df.market_data_cover.astype(float)
-df.spatial_data_cover = df.spatial_data_cover.astype(float)
-
-city_continent = pd.read_csv(path_folder + "CityDatabases/cityDatabase_221NewCities.csv")
-city_continent = city_continent.iloc[:, [0, 2]]
-city_continent = city_continent.drop_duplicates(subset = "City")
-city_continent = city_continent.sort_values('City')
-df = df.merge(city_continent, left_on = "City", right_on = "City")
-fixed_effects = pd.get_dummies(df.Continent_y)
+fixed_effects = pd.get_dummies(df.Continent)
 df["Asia"] = fixed_effects.Asia
-#df["Africa"] = fixed_effects.Africa
 df["North_America"] = fixed_effects.North_America
 df["Oceania"] = fixed_effects.Oceania
 df["South_America"] = fixed_effects.South_America
@@ -1178,11 +805,12 @@ df["Europe"]= fixed_effects.Europe
 s = "log_population + log_income + log_agri_rent + substitution_potential + log_pop_growth + log_inc_growth + urba + r2_density"
 s_brt = s + "+ network_pop+ network_pop2"
 
+# TABLE S8
+
 df["emissions_2035_CT_var"] = df["emissions_2035_CT_var"].astype(float)
 df["emissions_2035_FE_var"] = df["emissions_2035_FE_var"].astype(float)
 df["emissions_2035_UGB_var"] = df["emissions_2035_UGB_var"].astype(float)
 df["emissions_2035_BRT_var"] = df["emissions_2035_BRT_var"].astype(float)
-
 
 reg1 = ols("emissions_2035_CT_var ~ " + s, data=df).fit(cov_type='HC3')
 reg1.summary()
@@ -1195,6 +823,8 @@ reg3.summary()
 
 reg4 = ols("emissions_2035_BRT_var ~ " + s_brt, data=df).fit(cov_type='HC2')
 reg4.summary()
+
+# TABLE S7
 
 df["welfare_2035_CT_var"] = df["welfare_2035_CT_var"].astype(float)
 df["welfare_2035_FE_var"] = df["welfare_2035_FE_var"].astype(float)
@@ -1213,6 +843,8 @@ reg3.summary()
 reg4 = ols("welfare_2035_BRT_var ~ " + s_brt, data=df).fit(cov_type='HC2')
 reg4.summary()
 
+# TABLE S11
+
 df["cost_effectiveness_with_cobenefits_CT"] =  (df.welfare_with_cobenefits_2035_CT / df.welfare_with_cobenefits_2035_BAU) / (df.emissions_2035_CT / df.emissions_2035_BAU)
 df["cost_effectiveness_with_cobenefits_FE"] = (df.welfare_with_cobenefits_2035_FE / df.welfare_with_cobenefits_2035_BAU) / (df.emissions_2035_FE / df.emissions_2035_BAU)
 df["cost_effectiveness_with_cobenefits_UGB"] = (df.welfare_with_cobenefits_2035_UGB / df.welfare_with_cobenefits_2035_BAU) / (df.emissions_2035_UGB / df.emissions_2035_BAU)
@@ -1230,12 +862,9 @@ reg3.summary()
 reg4 = ols("cost_effectiveness_with_cobenefits_BRT ~ " + s_brt, data=df).fit(cov_type='HC2')
 reg4.summary()
 
-
-
 #PCA Analysis
 features = ['log_population', 'log_income', 'substitution_potential', 'log_pop_growth', 'log_inc_growth', 'log_density']
 x = df.loc[:, features].values
-#y = df.loc[:,['cost_effectiveness_with_cobenefits_BRT', 'cost_effectiveness_with_cobenefits_UGB', 'cost_effectiveness_with_cobenefits_FE', 'cost_effectiveness_with_cobenefits_CT']].values
 x = StandardScaler().fit_transform(x)
 pca = PCA(n_components=4)
 principalComponents = pca.fit_transform(x)
@@ -1245,6 +874,8 @@ principalDf = pd.DataFrame(data = principalComponents
 finalDf = pd.concat([principalDf, df[["cost_effectiveness_with_cobenefits_CT","cost_effectiveness_with_cobenefits_FE", "cost_effectiveness_with_cobenefits_BRT", "cost_effectiveness_with_cobenefits_UGB", "welfare_2035_CT_var","welfare_2035_FE_var","welfare_2035_UGB_var","welfare_2035_BRT_var","emissions_2035_CT_var","emissions_2035_FE_var","emissions_2035_UGB_var","emissions_2035_BRT_var", "City", "r2_density", 'network_pop', 'network_pop2']]], axis = 1)
 print(pca.explained_variance_ratio_)
 print(pca.components_)
+
+# FIGURE S10
 
 plt.figure(figsize = (12.2, 6))
 font = {'family' : 'normal',
@@ -1262,6 +893,8 @@ ax.set_aspect("equal")
 
 s = 'principal_component_1 + principal_component_2 + principal_component_3+ principal_component_4'
 
+# TABLE S9
+
 reg1 = ols("welfare_2035_CT_var ~ " + s + '+ r2_density', data=finalDf).fit(cov_type='HC3')
 reg1.summary()
 
@@ -1273,6 +906,8 @@ reg1.summary()
 
 reg1 = ols("welfare_2035_BRT_var ~ " + s + '+ r2_density + network_pop + network_pop2', data=finalDf).fit(cov_type='HC3')
 reg1.summary()
+
+# TABLE S10
 
 reg1 = ols("emissions_2035_CT_var ~ " + s + '+ r2_density', data=finalDf).fit(cov_type='HC3')
 reg1.summary()
@@ -1286,6 +921,8 @@ reg1.summary()
 reg1 = ols("emissions_2035_BRT_var ~ " + s + '+ r2_density + network_pop + network_pop2', data=finalDf).fit(cov_type='HC3')
 reg1.summary()
 
+# TABLE S12
+
 reg1 = ols("cost_effectiveness_with_cobenefits_CT ~ " + s + '+ r2_density', data=finalDf).fit(cov_type='HC3')
 reg1.summary()
 
@@ -1297,153 +934,3 @@ reg1.summary()
 
 reg1 = ols("cost_effectiveness_with_cobenefits_UGB ~ " + s + '+ r2_density', data=finalDf).fit(cov_type='HC3')
 reg1.summary()
-
-#Impact of policies on the distance to the city center and on modal shares
-df["var_dist_city_center_CT"] = 100 * (df.avg_dist_city_center_CT - df.avg_dist_city_center_BAU) / df.avg_dist_city_center_BAU
-df["var_modal_share_cars_CT"] = 100 * (df.modal_share_cars_CT - df.modal_share_cars_BAU) / df.modal_share_cars_BAU
-
-colors = ['#fc8d62', '#fc8d62', '#fc8d62']
-colors1 = dict(color=colors[0])
-colors2 = dict(color=colors[1])
-colors3 = dict(color=colors[2])
-
-fig, ax = plt.subplots(figsize = (6, 4))
-ax.spines['top'].set_visible(True)
-ax.spines['right'].set_visible(False)
-ax.spines['left'].set_visible(False)
-ax.yaxis.set_ticks_position('none')
-ax.tick_params(axis = 'both', labelsize=14, color='#4f4e4e')
-ax.grid(color='grey', axis='x', linestyle='-', linewidth=0.25, alpha=0.5)
-bp1 = sns.boxplot(y = "var_dist_city_center_CT", x = "Continent", data = df, order = ['Asia', 'Europe', 'North_America', 'Oceania', 'South_America'], boxprops = dict(linewidth=2, facecolor=(0,0,0,0), edgecolor="#fc8d62"), medianprops = dict(linewidth=2, color="#fc8d62"), whiskerprops = dict(linewidth=2, color="#fc8d62"), capprops = dict(linewidth=2, color="#fc8d62"), flierprops = colors3, showfliers=False, saturation = 1)
-bp2 = sns.swarmplot(y = df.var_dist_city_center_CT, x = df.Continent, palette = ["#404040"], order = ['Asia', 'Europe', 'North_America', 'Oceania', 'South_America'])
-plt.xticks(ticks = np.arange(0, 5), labels = ['Asia', 'Europe', 'North \n America', 'Oceania', 'South \n America'])
-plt.ylabel("Variations (%)", fontsize = 14)
-plt.xlabel("", fontsize = 1)
-plt.grid(visible = True, axis = 'y')
-plt.grid(visible = False, axis = 'x')
-plt.savefig("dist_center_ct")
-
-
-fig, ax = plt.subplots(figsize = (6, 4))
-ax.spines['top'].set_visible(True)
-ax.spines['right'].set_visible(False)
-ax.spines['left'].set_visible(False)
-ax.yaxis.set_ticks_position('none')
-ax.tick_params(axis = 'both', labelsize=14, color='#4f4e4e')
-ax.grid(color='grey', axis='x', linestyle='-', linewidth=0.25, alpha=0.5)
-bp1 = sns.boxplot(y = "var_modal_share_cars_CT", x = "Continent", data = df, order = ['Asia', 'Europe', 'North_America', 'Oceania', 'South_America'], boxprops = dict(linewidth=2, facecolor=(0,0,0,0), edgecolor="#fc8d62"), medianprops = dict(linewidth=2, color="#fc8d62"), whiskerprops = dict(linewidth=2, color="#fc8d62"), capprops = dict(linewidth=2, color="#fc8d62"), flierprops = colors3, showfliers=False, saturation = 1)
-bp2 = sns.swarmplot(y = df.var_modal_share_cars_CT, x = df.Continent, palette = ["#404040"], order = ['Asia', 'Europe', 'North_America', 'Oceania', 'South_America'])
-plt.xticks(ticks = np.arange(0, 5), labels = ['Asia', 'Europe', 'North \n America', 'Oceania', 'South \n America'])
-plt.ylabel("Variations (%)", fontsize = 14)
-plt.xlabel("", fontsize = 1)
-plt.grid(visible = True, axis = 'y')
-plt.grid(visible = False, axis = 'x')
-plt.savefig("mod_share_ct")
-
-df["var_dist_city_center_FE"] = 100 * (df.avg_dist_city_center_FE - df.avg_dist_city_center_BAU) / df.avg_dist_city_center_BAU
-df["var_modal_share_cars_FE"] = 100 * (df.modal_share_cars_FE - df.modal_share_cars_BAU) / df.modal_share_cars_BAU
-
-
-fig, ax = plt.subplots(figsize = (6, 4))
-ax.spines['top'].set_visible(True)
-ax.spines['right'].set_visible(False)
-ax.spines['left'].set_visible(False)
-ax.yaxis.set_ticks_position('none')
-ax.tick_params(axis = 'both', labelsize=14, color='#4f4e4e')
-ax.grid(color='grey', axis='x', linestyle='-', linewidth=0.25, alpha=0.5)
-bp1 = sns.boxplot(y = "var_dist_city_center_FE", x = "Continent", data = df, order = ['Asia', 'Europe', 'North_America', 'Oceania', 'South_America'], boxprops = dict(linewidth=2, facecolor=(0,0,0,0), edgecolor="#fc8d62"), medianprops = dict(linewidth=2, color="#fc8d62"), whiskerprops = dict(linewidth=2, color="#fc8d62"), capprops = dict(linewidth=2, color="#fc8d62"), flierprops = colors3, showfliers=False, saturation = 1)
-bp2 = sns.swarmplot(y = df.var_dist_city_center_FE, x = df.Continent, palette = ["#404040"], order = ['Asia', 'Europe', 'North_America', 'Oceania', 'South_America'])
-plt.xticks(ticks = np.arange(0, 5), labels = ['Asia', 'Europe', 'North \n America', 'Oceania', 'South \n America'])
-plt.ylabel("Variations (%)", fontsize = 14)
-plt.xlabel("", fontsize = 1)
-plt.grid(visible = True, axis = 'y')
-plt.grid(visible = False, axis = 'x')
-
-
-
-fig, ax = plt.subplots(figsize = (6, 4))
-ax.spines['top'].set_visible(True)
-ax.spines['right'].set_visible(False)
-ax.spines['left'].set_visible(False)
-ax.yaxis.set_ticks_position('none')
-ax.tick_params(axis = 'both', labelsize=14, color='#4f4e4e')
-ax.grid(color='grey', axis='x', linestyle='-', linewidth=0.25, alpha=0.5)
-bp1 = sns.boxplot(y = "var_modal_share_cars_FE", x = "Continent", data = df, order = ['Asia', 'Europe', 'North_America', 'Oceania', 'South_America'], boxprops = dict(linewidth=2, facecolor=(0,0,0,0), edgecolor="#fc8d62"), medianprops = dict(linewidth=2, color="#fc8d62"), whiskerprops = dict(linewidth=2, color="#fc8d62"), capprops = dict(linewidth=2, color="#fc8d62"), flierprops = colors3, showfliers=False, saturation = 1)
-bp2 = sns.swarmplot(y = df.var_modal_share_cars_FE, x = df.Continent, palette = ["#404040"], order = ['Asia', 'Europe', 'North_America', 'Oceania', 'South_America'])
-plt.xticks(ticks = np.arange(0, 5), labels = ['Asia', 'Europe', 'North \n America', 'Oceania', 'South \n America'])
-plt.ylabel("Variations (%)", fontsize = 14)
-plt.xlabel("", fontsize = 1)
-plt.grid(visible = True, axis = 'y')
-plt.grid(visible = False, axis = 'x')
-
-df["var_dist_city_center_BRT"] = 100 * (df.avg_dist_city_center_BRT - df.avg_dist_city_center_BAU) / df.avg_dist_city_center_BAU
-df["var_modal_share_cars_BRT"] = 100 * (df.modal_share_cars_BRT - df.modal_share_cars_BAU) / df.modal_share_cars_BAU
-
-fig, ax = plt.subplots(figsize = (6, 4))
-ax.spines['top'].set_visible(True)
-ax.spines['right'].set_visible(False)
-ax.spines['left'].set_visible(False)
-ax.yaxis.set_ticks_position('none')
-ax.tick_params(axis = 'both', labelsize=14, color='#4f4e4e')
-ax.grid(color='grey', axis='x', linestyle='-', linewidth=0.25, alpha=0.5)
-bp1 = sns.boxplot(y = "var_dist_city_center_BRT", x = "Continent", data = df, order = ['Asia', 'Europe', 'North_America', 'Oceania', 'South_America'], boxprops = dict(linewidth=2, facecolor=(0,0,0,0), edgecolor="#fc8d62"), medianprops = dict(linewidth=2, color="#fc8d62"), whiskerprops = dict(linewidth=2, color="#fc8d62"), capprops = dict(linewidth=2, color="#fc8d62"), flierprops = colors3, showfliers=False, saturation = 1)
-bp2 = sns.swarmplot(y = df.var_dist_city_center_BRT, x = df.Continent, palette = ["#404040"], order = ['Asia', 'Europe', 'North_America', 'Oceania', 'South_America'])
-plt.xticks(ticks = np.arange(0, 5), labels = ['Asia', 'Europe', 'North \n America', 'Oceania', 'South \n America'])
-plt.ylabel("Variations (%)", fontsize = 14)
-plt.xlabel("", fontsize = 1)
-plt.grid(visible = True, axis = 'y')
-plt.grid(visible = False, axis = 'x')
-
-
-fig, ax = plt.subplots(figsize = (6, 4))
-ax.spines['top'].set_visible(True)
-ax.spines['right'].set_visible(False)
-ax.spines['left'].set_visible(False)
-ax.yaxis.set_ticks_position('none')
-ax.tick_params(axis = 'both', labelsize=14, color='#4f4e4e')
-ax.grid(color='grey', axis='x', linestyle='-', linewidth=0.25, alpha=0.5)
-bp1 = sns.boxplot(y = "var_modal_share_cars_BRT", x = "Continent", data = df, order = ['Asia', 'Europe', 'North_America', 'Oceania', 'South_America'], boxprops = dict(linewidth=2, facecolor=(0,0,0,0), edgecolor="#fc8d62"), medianprops = dict(linewidth=2, color="#fc8d62"), whiskerprops = dict(linewidth=2, color="#fc8d62"), capprops = dict(linewidth=2, color="#fc8d62"), flierprops = colors3, showfliers=False, saturation = 1)
-bp2 = sns.swarmplot(y = df.var_modal_share_cars_BRT, x = df.Continent, palette = ["#404040"], order = ['Asia', 'Europe', 'North_America', 'Oceania', 'South_America'])
-plt.xticks(ticks = np.arange(0, 5), labels = ['Asia', 'Europe', 'North \n America', 'Oceania', 'South \n America'])
-plt.ylabel("Variations (%)", fontsize = 14)
-plt.xlabel("", fontsize = 1)
-plt.grid(visible = True, axis = 'y')
-plt.grid(visible = False, axis = 'x')
-
-df["var_dist_city_center_UGB"] = 100 * (df.avg_dist_city_center_UGB - df.avg_dist_city_center_BAU) / df.avg_dist_city_center_BAU
-df["var_modal_share_cars_UGB"] = 100 * (df.modal_share_cars_UGB - df.modal_share_cars_BAU) / df.modal_share_cars_BAU
-
-
-fig, ax = plt.subplots(figsize = (6, 4))
-ax.spines['top'].set_visible(True)
-ax.spines['right'].set_visible(False)
-ax.spines['left'].set_visible(False)
-ax.yaxis.set_ticks_position('none')
-ax.tick_params(axis = 'both', labelsize=14, color='#4f4e4e')
-ax.grid(color='grey', axis='x', linestyle='-', linewidth=0.25, alpha=0.5)
-bp1 = sns.boxplot(y = "var_dist_city_center_UGB", x = "Continent", data = df, order = ['Asia', 'Europe', 'North_America', 'Oceania', 'South_America'], boxprops = dict(linewidth=2, facecolor=(0,0,0,0), edgecolor="#fc8d62"), medianprops = dict(linewidth=2, color="#fc8d62"), whiskerprops = dict(linewidth=2, color="#fc8d62"), capprops = dict(linewidth=2, color="#fc8d62"), flierprops = colors3, showfliers=False, saturation = 1)
-bp2 = sns.swarmplot(y = df.var_dist_city_center_UGB, x = df.Continent, palette = ["#404040"], order = ['Asia', 'Europe', 'North_America', 'Oceania', 'South_America'])
-plt.xticks(ticks = np.arange(0, 5), labels = ['Asia', 'Europe', 'North \n America', 'Oceania', 'South \n America'])
-plt.ylabel("Variations (%)", fontsize = 14)
-plt.xlabel("", fontsize = 1)
-plt.grid(visible = True, axis = 'y')
-plt.grid(visible = False, axis = 'x')
-
-
-
-fig, ax = plt.subplots(figsize = (6, 4))
-ax.spines['top'].set_visible(True)
-ax.spines['right'].set_visible(False)
-ax.spines['left'].set_visible(False)
-ax.yaxis.set_ticks_position('none')
-ax.tick_params(axis = 'both', labelsize=14, color='#4f4e4e')
-ax.grid(color='grey', axis='x', linestyle='-', linewidth=0.25, alpha=0.5)
-bp1 = sns.boxplot(y = "var_modal_share_cars_UGB", x = "Continent", data = df, order = ['Asia', 'Europe', 'North_America', 'Oceania', 'South_America'], boxprops = dict(linewidth=2, facecolor=(0,0,0,0), edgecolor="#fc8d62"), medianprops = dict(linewidth=2, color="#fc8d62"), whiskerprops = dict(linewidth=2, color="#fc8d62"), capprops = dict(linewidth=2, color="#fc8d62"), flierprops = colors3, showfliers=False, saturation = 1)
-bp2 = sns.swarmplot(y = df.var_modal_share_cars_UGB, x = df.Continent, palette = ["#404040"], order = ['Asia', 'Europe', 'North_America', 'Oceania', 'South_America'])
-plt.xticks(ticks = np.arange(0, 5), labels = ['Asia', 'Europe', 'North \n America', 'Oceania', 'South \n America'])
-plt.ylabel("Variations (%)", fontsize = 14)
-plt.xlabel("", fontsize = 1)
-plt.grid(visible = True, axis = 'y')
-plt.grid(visible = False, axis = 'x')
-
-
