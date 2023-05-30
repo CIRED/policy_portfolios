@@ -1,5 +1,5 @@
 # Environmental and welfare gains via urban transport policy portfolios across 120 cities
-### Charlotte LIOTTA, Vincent VIGUIE, Felix CREUTZIG (*Minor Revisions* at *Nature Sustainability*)
+### Charlotte LIOTTA, Vincent VIGUIE, Felix CREUTZIG. *Nat Sustain* (2023). *https://doi.org/10.1038/s41893-023-01138-0*
 
 This code allows to calibrate a model derived from the standard urban model of urban economics on 120 cities worldwide, and to simulate the impact of 4 transport emissions mitigation policies as well as of policy portfolios on these cities.
 
